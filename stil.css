@@ -1,0 +1,51 @@
+﻿a:link {font-family:"Arial","Helvetica Bold", sans-serif;color:#0000FF;text-decoration:none;}
+a:visited {font-family:"Arial","Helvetica Bold", sans-serif;color:#800000;text-decoration:none;} 
+
+h1{
+font-family:"Arial Black", "Helvetica Bold", sans-serif; 
+text-align:center;
+font-size:22px
+}
+
+h2{
+font-family:"Arial", "Helvetica Bold", sans-serif; 
+font-size:20px
+}
+
+h3{
+font-family:"Arial", "Helvetica Bold", sans-serif; 
+font-size:17px
+}
+
+h4{
+font-family:"Arial", "Helvetica Bold", sans-serif; 
+font-size:16px
+}
+
+h5{
+font-family:"Arial", "Helvetica Bold", sans-serif; 
+font-size:14px
+}
+
+
+p{
+font-family:"Arial", "Helvetica Bold", sans-serif;
+font-size:14px
+}
+
+body{
+width:800px;
+margin-left:auto;
+margin-right:auto;
+text-align:justify
+}
+
+code{
+position:relative;left:10%
+}
+
+<!--
+img{
+position:relative; left:0%
+}
+-->

@@ -1,0 +1,65 @@
+﻿<!DOCTYPE HTML PUBLIC 
+"-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Dual-Tree Rational Dilation Complex Wavelet Transform </title>
+<link rel="stylesheet" href="../stil.css" />
+
+</head>
+<body>
+<br/>
+<br/>
+<p>
+<A href="../">Home<A>
+
+<hr/>
+
+<h1> Dual-Tree Rational Dilation Complex Wavelet Transform </h1>
+
+<hr/>
+<h4> Manuscript </h4>
+<p> "A Dual-Tree Rational-Dilation Complex Wavelet Transform", İ. Bayram and I. W. Selesnick. Manuscript submitted to IEEE Transactions on Signal Processing, November 2010. [<a href="DtRadwt.pdf">.pdf</a>]
+
+<hr/>
+
+<h4> Software </h4>
+<p> The file <a href="TmStrtchTBox.zip">TmStrtchTBox.zip<a>  contains a Matlab implementation for time-scaling of audio using DT-RADWT. 
+Matlab code for time-scaling using the phase vocoder can be found at <a href="http://www.ee.columbia.edu/~dpwe/resources/matlab/pvoc/">http://www.ee.columbia.edu/~dpwe/resources/matlab/pvoc/</a> .<br/>
+
+<hr/>
+
+<h4> Experiments </h4>
+<p> Below are two sets of time-scaling experiments using DT-RADWT and the phase vocoder. The phase vocoder results are not further processed to suppress the 'phasiness'. Our aim here is to compare the raw outputs. We also remark that time-scaling with the phase vocoder can be done much faster than with our current implementation of DT-RADWT. Time-scaling with DT-RADWT doesn't seem to suffer from phasiness (Exp I, Exp II). However, sometimes for speech (Exp III), some distortion occurs which is not present when the phase vocoder is utilized.
+<br/>
+<br/>
+
+Exp I (Violin) : <a href="results/D_Gypsy-run-up_150.wav">Original<a>; Accelerated : <a href="results/VioDtRadwt3D4.wav">DT-RADWT<a>, <a href="results/VioPhVoc3D4.wav"> Phase Vocoder<a>.  
+
+Decelerated : <a href="results/VioDtRadwt4D3.wav">DT-RADWT<a>, <a href="results/VioPhVoc4D3.wav"> Phase Vocoder<a>. 
+
+<br/>
+<!-- Note : Violin loop is obtained from <a href="http://efiddler.com/">http://efiddler.com/</a> -->Exp II (Speech) :  <a href="results/Matthieu.wav">Original<a>; Accelerated : <a href="results/MattDtRadwt3D4.wav">DT-RADWT<a>, <a href="results/MattPhVoc3D4.wav">Phase Vocoder<a>.  
+
+Decelerated : <a href="results/MattDtRadwt4D3.wav">DT-RADWT<a>, <a href="results/MattPhVoc4D3.wav"> Phase Vocoder<a>.<br/>
+
+Exp III (Speech) :  <a href="results/sp1.wav">Original<a>; Accelerated : <a href="results/SpDtRadwt3D4.wav">DT-RADWT<a>, <a href="results/SpPhVoc3D4.wav">Phase Vocoder<a>.  
+
+Decelerated : <a href="results/SpDtRadwt4D3.wav">DT-RADWT<a>, <a href="results/SpPhVoc4D3.wav"> Phase Vocoder<a>.
+
+
+
+<hr/>
+<p>
+There is one subtle point about the transform used in the code. Recall that DT-RADWT consists of two iterated FBs with rational sampling factors as shown below. 
+<center>
+<img src="DtRadwt.gif"/>
+</center>
+<p>
+In [1], the filters are determined by the sampling factors (p,q,s). However, it can be shown that, the filters for the FB with sampling factors (p,q,s) can be used in an FB with sampling factors (p,q,r) without affecting the perfect reconstruction property, provided 's' is not greater than 'r'. This small modification, which we did not discuss in the paper due to lack of space, allows finer frequency analysis to be used in a more redundant DT-RADWT, which we found useful for this particular application.
+
+<hr/>
+<p>
+[1] Frequency-Domain Design of Overcomplete Rational-Dilation Wavelet Transforms. I. Bayram and I. W. Selesnick, IEEE Trans. on Signal Processing. 57(8):2957-2972, August 2009.
+</body>
+</html>

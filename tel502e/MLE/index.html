@@ -1,0 +1,169 @@
+
+<!DOCTYPE hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhead><script type="text/x-mathjax-config">  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script> <script type="text/javascript"  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>';
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>A Biased Maximum Likelihood Estimator</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-03-13"><meta name="DC.source" content="mle.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>A Biased Maximum Likelihood Estimator</h1><p>Suppose $X_1, \ldots , X_n$ are uniformly distributed on  $[0, \theta ]$, where $\theta$ is unknown. The maximum likelihood estimator for $\theta$ is $T = \max(X_1, ..., X_n)$. But the expected value of $T$ is $n\theta/(n+1)$. Let us see what this means. We will take $n=3$, to get an idea. Let us first select a $\theta$.</p><pre class="codeinput">theta = 1 / rand(1,1);
+</pre><p>Let us pretend we do not know the value of $\theta$. Using this 'unknown' $\theta$, we produce $n$ observations from a uniform distribution over $[0, \theta ]$.</p><pre class="codeinput">n = 3;
+x = theta*rand(1,n)
+</pre><pre class="codeoutput">
+x =
+
+    1.1118    0.1559    1.1211
+
+</pre><p>For this realization, the estimate of $\theta$ is given as.</p><pre class="codeinput">T = max(x)
+</pre><pre class="codeoutput">
+T =
+
+    1.1211
+
+</pre><p>Let us check if T is close to $n\theta/(n+1)$.</p><pre class="codeinput">T - n*theta/(n+1)
+</pre><pre class="codeoutput">
+ans =
+
+    0.2005
+
+</pre><p>This is far from zero. But we said that the expected value of $T$ is $n\theta/(n+1)$. What's going on?</p><p>Here's an explanation : We said the expected value of $T$ is $n\theta/(n+1)$ but we just compared a single realization of $T$ to its expected value. To better estimate the expected value of $T$, we need to average over many realizations. The code below makes it more concrete.</p><pre class="codeinput">K = 100; <span class="comment">% number of realizations</span>
+AvgT = 0;
+<span class="keyword">for</span> i = 1:K,
+    x = theta*rand(1,n);
+    T = max(x);
+    AvgT = AvgT + T/K;
+<span class="keyword">end</span>
+AvgT - n*theta/(n+1)
+</pre><pre class="codeoutput">
+ans =
+
+   -0.0154
+
+</pre><p>This is much closer to zero. If we increase the number of realizations, the average of $T$ further approaches its expected value.</p><pre class="codeinput">K = 10^5; <span class="comment">% number of realizations</span>
+AvgT = 0;
+<span class="keyword">for</span> i = 1:K,
+    x = theta*rand(1,n);
+    T = max(x);
+    AvgT = AvgT + T/K;
+<span class="keyword">end</span>
+AvgT - n*theta/(n+1)
+</pre><pre class="codeoutput">
+ans =
+
+   3.2041e-04
+
+</pre><p>Note that this discussion is justified by the Weak Law of Large Numbers.</p><p><i>Ilker Bayram, Istanbul Teknik Universitesi, 2015</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% A Biased Maximum Likelihood Estimator
+% Suppose $X_1, \ldots , X_n$ are uniformly distributed on  $[0, \theta ]$,
+% where $\theta$ is unknown. The maximum likelihood estimator for
+% $\theta$
+% is $T = \max(X_1, ..., X_n)$. But the expected value of $T$ is
+% $n\theta/(n+1)$. Let us see what this means. We will take $n=3$, to get
+% an idea. Let us first select a $\theta$. 
+theta = 1 / rand(1,1);
+%%
+% Let us pretend we do not know the value of $\theta$. Using this 'unknown'
+% $\theta$, we produce $n$ observations from a uniform distribution over $[0,
+% \theta ]$.
+n = 3;
+x = theta*rand(1,n)
+%%
+% For this realization, the estimate of $\theta$ is given as.
+T = max(x)
+%%
+% Let us check if T is close to $n\theta/(n+1)$.
+T - n*theta/(n+1)
+%% 
+% This is far from zero. But we said that the expected value of $T$ is
+% $n\theta/(n+1)$. What's going on?
+% 
+% Here's an explanation : We said the expected value of $T$ is
+% $n\theta/(n+1)$ but we just compared a single realization of $T$ to its
+% expected value. To better estimate the expected value of $T$, we need to
+% average over many realizations. The code below makes it more concrete.
+K = 100; % number of realizations
+AvgT = 0;
+for i = 1:K,
+    x = theta*rand(1,n);
+    T = max(x);
+    AvgT = AvgT + T/K;
+end
+AvgT - n*theta/(n+1)
+
+%%
+% This is much closer to zero. If we increase the number of realizations,
+% the average of $T$ further approaches its expected value.
+K = 10^5; % number of realizations
+AvgT = 0;
+for i = 1:K,
+    x = theta*rand(1,n);
+    T = max(x);
+    AvgT = AvgT + T/K;
+end
+AvgT - n*theta/(n+1)
+
+%%
+% Note that this discussion is justified by the Weak Law of Large Numbers.
+
+%%
+% _Ilker Bayram, Istanbul Teknik Universitesi, 2015_
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC 
+"-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Promoting Sparsity Within and Across Groups</title>
+<link rel="stylesheet" href="../stil.css" />
+
+</head>
+<body>
+<br/>
+<br/>
+<p>
+<A href="../">Home<A>
+
+<hr/>
+
+<h1> A Penalty Function Promoting Sparsity Within and Across Groups </h1>
+
+<hr/>
+
+<h4> Software </h4>
+<p> The file <a href="SWAG.zip">SWAG.zip<a> contains Matlab codes used in the experiments from the manuscript "A Penalty Function Promoting Sparsity Within and Across Groups", by I. Bayram and S. Bulek, 2016.
+
+<hr/>
+
+<h4> Audio Denoising Experiment </h4>
+<p> Below are some results from the audio denoising experiment from the manuscript.
+In the manuscript, due to lack of space, we show the results only for input SNR = 5 dB. Here we also provide the sound files and spectrograms for when input SNR = 0 dB.
+<p>
+The original signal is speech but it is degraded by additive ambient noise.
+<br/>
+<hr width="500"> 
+<table>
+<tr>
+<td><p>Noisy Observation</td>
+<td><audio controls="controls">  
+   <source src="results/noisy5.wav" />  
+</audio> 
+</td>
+<td><center><p>SNR = 5 dB</center></td>
+</tr>
+</table>
+
+<p> Here are the reconstructions obtained by the methods described in the manuscript.
+<table>
+<tr>
+<td><p>l<sub>1</sub> Norm Regularization</td>
+<td><audio controls="controls">  
+   <source src="results/l15.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 6.42 dB</center></td>
+</tr>
+<tr>
+<td><p>E-Lasso Norm Regularization</td>
+<td><audio controls="controls">  
+   <source src="results/elasso5.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 6.54 dB</center></td>
+</tr>
+<tr>
+<td><p>Mixed (l<sub>2,1</sub>) Norm Regularization</td>
+<td><audio controls="controls">  
+   <source src="results/mixed5.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 6.09 dB</center></td>
+</tr>
+<tr>
+<td><p>Proposed Penalty</td>
+<td><audio controls="controls">  
+   <source src="results/proposed5.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 6.67 dB</center></td>
+</tr>
+</tr>
+<tr>
+<td><p>Hybrid (proposed + l<sub>2,1</sub>) Penalty</td>
+<td><audio controls="controls">  
+   <source src="results/hybrid5.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 7.55 dB</center></td>
+</tr>
+</table>
+
+<p> Below are the spectrograms of the signals
+
+<center>
+<p> <img src="spectro/clean.jpg"  width="400" height="300" ><img src="spectro/noisy5.jpg"  width="400" height="300" > 
+
+<p> <img src="spectro/l15.jpg"  width="400" height="300" ><img src="spectro/elasso5.jpg"  width="400" height="300" > 
+
+<p> <img src="spectro/mixed5.jpg"  width="400" height="300" ><img src="spectro/proposed5.jpg"  width="400" height="300" >
+
+<p> <img src="spectro/hybrid5.jpg"  width="400" height="300" >
+</center>
+
+<hr width="500"> 
+<p>
+Below are the noisy signal and the denoised ones using different methods for input SNR = 0 dB.
+
+<table>
+<tr>
+<td><p>Noisy Observation</td>
+<td><audio controls="controls">  
+   <source src="results/noisy0.wav" />  
+</audio> 
+</td>
+<td><center><p>SNR = 0 dB</center></td>
+</tr>
+<tr>
+<td><p>l<sub>1</sub> Norm Regularization</td>
+<td><audio controls="controls">  
+   <source src="results/l10.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 2.48 dB</center></td>
+</tr>
+<tr>
+<td><p>E-Lasso Norm Regularization</td>
+<td><audio controls="controls">  
+   <source src="results/elasso0.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 2.63 dB</center></td>
+</tr>
+<tr>
+<td><p>Mixed (l<sub>2,1</sub>) Norm Regularization</td>
+<td><audio controls="controls">  
+   <source src="results/mixed0.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 2.38 dB</center></td>
+</tr>
+<tr>
+<td><p>Proposed Penalty</td>
+<td><audio controls="controls">  
+   <source src="results/proposed0.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 2.64 dB</center></td>
+</tr>
+</tr>
+<tr>
+<td><p>Hybrid (proposed + l<sub>2,1</sub>) Penalty</td>
+<td><audio controls="controls">  
+   <source src="results/hybrid0.wav" />  
+</audio> 
+</td>
+<td><center><p>Output SNR = 3.86 dB</center></td>
+</tr>
+</table>
+
+<center>
+<p> <img src="spectro/noisy0.jpg"  width="400" height="300" ><img src="spectro/l10.jpg"  width="400" height="300" >
+
+<p> <img src="spectro/elasso0.jpg"  width="400" height="300" ><img src="spectro/mixed0.jpg"  width="400" height="300" >
+
+<p> <img src="spectro/proposed0.jpg"  width="400" height="300" ><img src="spectro/hybrid0.jpg"  width="400" height="300" > 
+</center>
+</body>
+</html>

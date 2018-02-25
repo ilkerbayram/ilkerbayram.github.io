@@ -1,0 +1,380 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EHB 372E Week-6 : The Short-Time Fourier Transform</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-03-16"><meta name="DC.source" content="theSTFT.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>EHB 372E Week-6 : The Short-Time Fourier Transform</h1><!--introduction--><p>For analyzing audio signals, the time domain and the frequency domain representations may be used for different tasks but for some applications we need a representation that jointly represents the time-frequency information. The short-time Fourier transform can be used for this purpose. The STFT consists of the DFTs of portions of the time-domain signal. We will be interested in the STFT of audio signals, so let us first see how to read an audio signal. We will work with .wav files.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Audio Input</a></li><li><a href="#6">Viewing Audio</a></li><li><a href="#15">The STFT : How to implement</a></li><li><a href="#19">Inverting the STFT</a></li><li><a href="#23">In-Class Exercises</a></li><li><a href="#25">Homework</a></li></ul></div><h2>Audio Input<a name="1"></a></h2><p>For reading in audio, we use the function 'wavread'. Let us read the file 'Glock.wav'. This is a short melody played by a glockenspiel.</p><pre class="codeinput">[x,fs] = wavread(<span class="string">'Glock.wav'</span>);
+</pre><p>Here 'x' contains the samples of the audio signal and fs is the sampling frequency. Note that we need to know 'fs' to properly play the audio. To hear what 'x' sounds like, use the function 'soundsc'. Do not forget to provide 'fs'.</p><pre class="codeinput">soundsc(x,fs);
+</pre><p>To understand why 'fs' is important, try the following.</p><pre class="codeinput">soundsc(x,fs/2);
+</pre><p>Now try doubling 'fs'.</p><pre class="codeinput">soundsc(x,2*fs);
+</pre><p>What would happen if you played speech with a wrong 'fs'? (you can try it on 'matematik.wav')</p><h2>Viewing Audio<a name="6"></a></h2><p>Now that we know how to read in audio to Matlab, let us discuss how to visualize audio. Let us plot the function in the time domain</p><pre class="codeinput">figure;
+plot(x);
+axis <span class="string">tight</span>; <span class="comment">% this discards the unnecessary white space</span>
+</pre><img vspace="5" hspace="5" src="theSTFT_01.png" alt=""> <p>Notice that the unit of the x-axis is 'samples'. But these samples are related to time. It might be preferable to use 'seconds' as the time unit. To convert, we need to use the sampling frequency 'fs'. Note that there are 'fs' samples in a second. So, if the length of the signal is N samples, the total duration of the signal should be N/fs seconds.</p><pre class="codeinput">t = (0:length(x)-1)/fs;
+plot(t,x);
+axis <span class="string">tight</span>;
+xlabel(<span class="string">'seconds'</span>);
+</pre><img vspace="5" hspace="5" src="theSTFT_02.png" alt=""> <p>We now see that the signal duration is about 6 seconds. Notice that from the time domain representation, we can see where the notes start and end. But it is not easy to see which particular notes are being played. That is, the contents of the notes are not visible when we view the time-domain signal. For that, we need a frequency domain image. We can obtain a frequency domain image with FFT or freqz.</p><pre class="codeinput">[H,W] = freqz(x); <span class="comment">% try 'help freqz' to see what H and W is</span>
+plot(W,abs(H));
+axis <span class="string">tight</span>;
+</pre><img vspace="5" hspace="5" src="theSTFT_03.png" alt=""> <p>Here, the frequency unit is 'radians/sample'. But we would like to see 'Hertz'. To convert 'rad/sample' to 'Hz', remember that the highest frequency for a discrete time signal is <img src="theSTFT_eq11731.png" alt="$\pi$"> rad/sample and it corresponds to 'fs/2' Hz.</p><pre class="codeinput">f = (fs/2)*W/pi;
+plot(f/1000,abs(H));
+axis <span class="string">tight</span>;
+xlabel(<span class="string">'KHz'</span>);
+</pre><img vspace="5" hspace="5" src="theSTFT_04.png" alt=""> <p>The frequency unit is now Hz. We can see some peaks, which actually correspond to notes, but it's not easy to say which of these occur when. STFT comes into play at this point. Here's what we would like to do this week.</p><pre class="codeinput">win = hamming(50*fs/1000); <span class="comment">% analysis window of length 50 msec.</span>
+hop = round(length(win)/4); <span class="comment">% the hop-size</span>
+win = NormalizeW(win,hop); <span class="comment">% this step you will skip</span>
+
+X = STFT(x,win,hop); <span class="comment">% this is my STFT function, you'll write your own</span>
+</pre><p>X contains the STFT coefficients. It is a time-frequency representation and may be regarded as an image. We can display its magnitude using 'imagesc' (we will display its magnitude only, the phase is important too but the magnitude usually provides enough visual information to understand the signal content).</p><pre class="codeinput">imagesc( abs( X ) );
+</pre><img vspace="5" hspace="5" src="theSTFT_05.png" alt=""> <p>We don't see much in this image, but the information is actually there. With audio, the logarithm of the magnitude is visually more revealing.</p><pre class="codeinput">imagesc( log( abs( X ) ) );
+</pre><img vspace="5" hspace="5" src="theSTFT_06.png" alt=""> <p>This is much better but it is still not easy to interpret because the axes are not properly labeled and negative and positive frequencies are present in the same image. Below is what you get when you properly zoom in and label.</p><pre class="codeinput"><span class="comment">%some preparation for displaying the STFT coefficients</span>
+Fr = [0 8000]; <span class="comment">% the frequency range to view</span>
+clim = [-50 0]; <span class="comment">% the amplitude range to view (in decibels)</span>
+
+DispSTFT(X/max(abs(X(:))), fs, length(win), hop, Fr, clim); <span class="comment">% this is my display function, you'll write your own</span>
+</pre><img vspace="5" hspace="5" src="theSTFT_07.png" alt=""> <p>We can now see which note occurs when. This week, you will implement an STFT function, a display function, and the inverse STFT function.</p><h2>The STFT : How to implement<a name="15"></a></h2><p>The idea in STFT is to take a small chunk using a window, compute its DFT and place it as the column of a matrix. Then, you move the window a little and compute the DFT again. We will collect the STFT coefficients into  the matrix Z. Here is the first step.</p><pre class="codeinput">N = 40*fs/1000;
+win = hamming(N);
+F = fft( x(1:N) .* win );
+Z = F; <span class="comment">%F is the first column of Z</span>
+</pre><p>The next column is obtained by sliding the window by 'hop' samples. This is also referred to as the 'hop-size'.</p><pre class="codeinput">F = fft( x( hop + (1:N) ) .* win ); <span class="comment">% this is equivalent to sliding the window</span>
+Z(:,2) = F;
+</pre><p>You see the pattern ...</p><pre class="codeinput">F = fft( x( 2*hop + (1:N) ) .* win ); <span class="comment">% this is equivalent to sliding the window</span>
+Z(:,3) = F;
+</pre><p>This is continued until you reach the end of 'x'. Write a function called STFT which can be called as above.</p><h2>Inverting the STFT<a name="19"></a></h2><p>The STFT representation is useful because it allows us to obtain interesting effects via simple operations on the STFT coefficients. So, when processing a signal with the STFT, the idea is to compute the STFT coefficients, modify the coefficients and then invert the STFT to obtain the modified signal in the time domain. We now discuss how to invert the STFT.</p><p>Recall that the columns of Z hold the DFTs of the segments of x, modified by a window. For instance, we can obtain samples of x multipllied by a sliding window as follows.</p><pre class="codeinput">y1 = ifft( Z(:,1) ); <span class="comment">% the first N samples multiplied by the window</span>
+y2 = ifft( Z(:,2) ); <span class="comment">% the samples in between ( hop + (1:N) ) multiplied by the window.</span>
+y3 = ifft( Z(:,3) ); <span class="comment">% the samples in between ( 2*hop + (1:N) ) multiplied by the window.</span>
+</pre><p>In an attempt to reconstruct x, we combine these pieces as follows.</p><pre class="codeinput">y = zeros(N + 2*hop,1);
+y(1:N) = y1;
+y( hop + (1:N) ) = y( hop + (1:N) ) + y2;
+y( 2*hop + (1:N) ) = y( 2*hop + (1:N) ) + y3;
+</pre><p>We would like y to be equal to the first samples of x but this is not the case. We need to take into account the windowing. In fact y can be seen to be equal to a masked version of x. The mask can be constructed similar to y.</p><pre class="codeinput">mask = zeros(N + 2*hop,1);
+mask(1:N) = win;
+mask( hop + (1:N) ) = mask( hop + (1:N) ) + win;
+mask( 2*hop + (1:N) ) = mask( 2*hop + (1:N) ) + win;
+
+z = x( 1:(N+2*hop) ) .* mask; <span class="comment">% we claim that z is equal to y</span>
+
+max( abs (y - z) ) <span class="comment">% check the claim -- the result should be numerically zero...</span>
+</pre><pre class="codeoutput">
+ans =
+
+   1.1102e-16
+
+</pre><p>Write a function called ISTFT that takes as input the STFT coefficients, the window used for the STFT and the hop size. Check that your function correctly recovers the original signal when the STFT coefficients are not modified.</p><pre class="codeinput">win = hamming(50*fs/1000);
+hop = round(length(win)/4);
+win = NormalizeW(win,hop);
+X = STFT(x,win,hop);
+
+z = ISTFT(X,win,hop);
+
+plot(x);
+hold <span class="string">on</span>;
+plot( abs( x-z(1:length(x)) ),<span class="string">'r'</span>);
+axis <span class="string">tight</span>;
+</pre><img vspace="5" hspace="5" src="theSTFT_08.png" alt=""> <h2>In-Class Exercises<a name="23"></a></h2><div><ol><li>Write your own STFT function. Your function should take as input the audio signal, the window and the hop-size. The output should be the STFT coefficients. See the section "The STFT : How to implement" in this document.</li><li>Write your own ISTFT function (the inverse STFT). Your function should take as input the STFT coefficients, the window and the hop-size. The output should be a time-domain signal. Implement your function as described in the section "Inverting the STFT".</li><li>Write a display function. Your function should take as input the STFT coefficients, the window length, the hop size, a frequency range to view and an amplitude range to view. Place the time and frequency labels so that you can tell when and at which frequency some component occurs. See the section  "Viewing Audio".</li><li>Read in 'matematik.wav';</li><li>Plot the function in the time domain and in the frequency domain.</li><li>Compute the STFT coefficients of the file and display them using your function.</li><li>Compute the ISTFT and compare with the original signal.</li></ol></div><h2>Homework<a name="25"></a></h2><p>In the file 'Restore.wav', there is an unwanted sinusoidal. Below is the spectrogram of the signal. Notice the red line segment in the middle. That represents the unwanted signal. You need to remove that.</p><p><img vspace="5" hspace="5" src="sinus.png" alt=""> </p><p>Remove the unwanted signal by applying a mask to the STFT coefficients of the signal. Do not apply a filter! You need to</p><div><ol><li>Obtain the STFT coefficients, and display it.</li><li>Construct a mask and multiply the STFT coefficients with the mask you constructed. Then display the resulting coefficients.</li><li>Compute the inverse STFT of the modified coefficients to obtain the signal free of the sinusoid.</li><li>Compute the STFT coefficients of the restored signal again and display them.</li></ol></div><p><i>Ilker Bayram,</i> <i>Istanbul Teknik Universitesi, 2015</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% EHB 372E Week-6 : The Short-Time Fourier Transform
+%
+% For analyzing audio signals, the time domain and the frequency domain
+% representations may be used for different tasks but for some applications
+% we need a representation that jointly represents the time-frequency
+% information. The short-time Fourier transform can be used for this
+% purpose. The STFT consists of the DFTs of portions of the time-domain
+% signal. We will be interested in the STFT of audio signals, so let us
+% first see how to read an audio signal. We will work with .wav files.
+
+%% Audio Input 
+%
+% For reading in audio, we use the function 'wavread'. Let us read the file
+% 'Glock.wav'. This is a short melody played by a glockenspiel.
+
+[x,fs] = wavread('Glock.wav');
+%%
+% Here 'x' contains the samples of the audio signal and fs is the sampling
+% frequency. Note that we need to know 'fs' to properly play the audio.
+% To hear what 'x' sounds like, use the function 'soundsc'. Do not forget
+% to provide 'fs'.
+
+soundsc(x,fs);
+%% 
+% To understand why 'fs' is important, try the following.
+
+soundsc(x,fs/2);
+%%
+% Now try doubling 'fs'.
+
+soundsc(x,2*fs);
+
+%%
+% What would happen if you played speech with a wrong 'fs'? (you can try it on 'matematik.wav')
+
+%% Viewing Audio
+% Now that we know how to read in audio to Matlab, let us discuss how to visualize audio.
+% Let us plot the function in the time domain
+figure;
+plot(x);
+axis tight; % this discards the unnecessary white space
+%%
+% Notice that the unit of the x-axis is 'samples'. But these samples are
+% related to time. It might be preferable to use 'seconds' as the
+% time unit. To convert, we need to use the sampling frequency 'fs'. Note that
+% there are 'fs' samples in a second. So, if the length of the signal is N
+% samples, the total duration of the signal should be N/fs seconds. 
+t = (0:length(x)-1)/fs;
+plot(t,x);
+axis tight;
+xlabel('seconds');
+%%
+% We now see that the signal duration is about 6 seconds.
+% Notice that from the time domain representation, we can see where the
+% notes start and end. But it is not easy to see which particular notes are being
+% played. That is, the contents of the notes are not visible when we view the
+% time-domain signal. For that, we need a frequency domain image. We can
+% obtain a frequency domain image with FFT or freqz.
+
+[H,W] = freqz(x); % try 'help freqz' to see what H and W is
+plot(W,abs(H));
+axis tight;
+
+%%
+% Here, the frequency unit is 'radians/sample'. But we would like to see 'Hertz'.
+% To convert 'rad/sample' to 'Hz', remember that the highest frequency for a discrete time signal is $\pi$ rad/sample and it corresponds
+% to 'fs/2' Hz. 
+f = (fs/2)*W/pi;
+plot(f/1000,abs(H));
+axis tight;
+xlabel('KHz');
+
+%% 
+% The frequency unit is now Hz. We can see some peaks, which actually correspond to notes, but it's not
+% easy to say which of these occur when. STFT comes into play at this
+% point. Here's what we would like to do this week.
+
+win = hamming(50*fs/1000); % analysis window of length 50 msec.
+hop = round(length(win)/4); % the hop-size
+win = NormalizeW(win,hop); % this step you will skip
+
+X = STFT(x,win,hop); % this is my STFT function, you'll write your own
+%%
+% X contains the STFT coefficients. It is a time-frequency representation
+% and may be regarded as an image. We can display its magnitude using
+% 'imagesc' (we will display its magnitude only, the phase is important too
+% but the magnitude usually provides enough visual information to understand the signal content).
+
+imagesc( abs( X ) );
+%%
+% We don't see much in this image, but the information is actually there. With audio, the logarithm of the magnitude is visually more revealing.
+
+imagesc( log( abs( X ) ) );
+
+
+%%
+% This is much better but it is still not easy to interpret 
+% because the axes are not properly labeled and negative and positive frequencies are present in the same image. Below is what
+% you get when you properly zoom in and label.
+
+%some preparation for displaying the STFT coefficients
+Fr = [0 8000]; % the frequency range to view
+clim = [-50 0]; % the amplitude range to view (in decibels)
+
+DispSTFT(X/max(abs(X(:))), fs, length(win), hop, Fr, clim); % this is my display function, you'll write your own
+
+%%
+% We can now see which note occurs when. 
+% This week, you will implement an STFT function, a display function, and
+% the inverse STFT function.
+
+%% The STFT : How to implement
+% The idea in STFT is to take a small chunk using a window, compute its DFT and place it
+% as the column of a matrix. Then, you move the window a little and compute
+% the DFT again.
+% We will collect the STFT coefficients into  the matrix Z.
+% Here is the first step. 
+
+N = 40*fs/1000;
+win = hamming(N);
+F = fft( x(1:N) .* win );
+Z = F; %F is the first column of Z
+
+%%
+% The next column is obtained by sliding the window by 'hop' samples.
+% This is also referred to as the 'hop-size'.
+F = fft( x( hop + (1:N) ) .* win ); % this is equivalent to sliding the window
+Z(:,2) = F;
+
+%% 
+% You see the pattern ...
+F = fft( x( 2*hop + (1:N) ) .* win ); % this is equivalent to sliding the window
+Z(:,3) = F;
+
+
+%%
+% This is continued until you reach the end of 'x'. 
+% Write a function called STFT which can be called as above.
+
+%% Inverting the STFT
+% The STFT representation is useful because it allows us to obtain
+% interesting effects via simple operations on the STFT coefficients.
+% So, when processing a signal with the STFT, the idea is to compute the STFT coefficients, modify the 
+% coefficients and then invert the STFT to obtain the modified signal in
+% the time domain. We now discuss how to invert the STFT.
+%
+% Recall that the columns of Z hold the DFTs of the segments of x, modified
+% by a window. For instance, we can obtain samples of x
+% multipllied by a sliding window as follows.
+
+y1 = ifft( Z(:,1) ); % the first N samples multiplied by the window
+y2 = ifft( Z(:,2) ); % the samples in between ( hop + (1:N) ) multiplied by the window.
+y3 = ifft( Z(:,3) ); % the samples in between ( 2*hop + (1:N) ) multiplied by the window.
+%%
+% In an attempt to reconstruct x, we combine these pieces as follows.
+y = zeros(N + 2*hop,1);
+y(1:N) = y1;
+y( hop + (1:N) ) = y( hop + (1:N) ) + y2;
+y( 2*hop + (1:N) ) = y( 2*hop + (1:N) ) + y3;
+
+%%
+% We would like y to be equal to the first samples of x but this is not the
+% case. We need to take into account the windowing. In fact y can be seen
+% to be equal to a masked version of x. The mask can be constructed similar
+% to y.
+
+mask = zeros(N + 2*hop,1);
+mask(1:N) = win;
+mask( hop + (1:N) ) = mask( hop + (1:N) ) + win;
+mask( 2*hop + (1:N) ) = mask( 2*hop + (1:N) ) + win;
+
+z = x( 1:(N+2*hop) ) .* mask; % we claim that z is equal to y
+
+max( abs (y - z) ) % check the claim REPLACE_WITH_DASH_DASH the result should be numerically zero...
+
+%% 
+% Write a function called ISTFT that takes as input the STFT coefficients,
+% the window used for the STFT and the hop size. Check that your function
+% correctly recovers the original signal when the STFT coefficients are not
+% modified.
+
+win = hamming(50*fs/1000); 
+hop = round(length(win)/4);
+win = NormalizeW(win,hop); 
+X = STFT(x,win,hop); 
+
+z = ISTFT(X,win,hop);
+
+plot(x);
+hold on;
+plot( abs( x-z(1:length(x)) ),'r');
+axis tight;
+
+%% In-Class Exercises
+%%
+% # Write your own STFT function. Your function should take as input the audio
+% signal, the window and the hop-size. The output should be the STFT
+% coefficients. See the section "The STFT : How to implement" in this
+% document.
+% # Write your own ISTFT function (the inverse STFT). Your function should take
+% as input the STFT coefficients, the window and the hop-size. The output
+% should be a time-domain signal. Implement your function as described in
+% the section "Inverting the STFT".
+% # Write a display function. Your function should take as input the STFT
+% coefficients, the window length, the hop size, a frequency range to view
+% and an amplitude range to view. Place the time and frequency labels
+% so that you can tell when and at which frequency some component occurs.
+% See the section  "Viewing Audio".
+% # Read in 'matematik.wav';
+% # Plot the function in the time domain and in the frequency domain.
+% # Compute the STFT coefficients of the file and display them using your
+% function.
+% # Compute the ISTFT and compare with the original signal.
+
+
+%% Homework
+% In the file 'Restore.wav', there is an unwanted sinusoidal. 
+% Below is the spectrogram of the signal. Notice the red line segment in the middle. That represents the unwanted signal. You
+% need to remove that.
+%
+% <<sinus.png>>
+%
+% Remove the unwanted signal by
+% applying a mask to the STFT coefficients of the signal. Do not apply a filter! 
+% You need to 
+%% 
+% # Obtain the STFT coefficients, and display it. 
+% # Construct a mask and multiply the STFT coefficients with the mask you
+% constructed. Then display the resulting coefficients.
+% # Compute the inverse STFT of the
+% modified coefficients to obtain the signal free of the sinusoid.
+% # Compute the STFT coefficients of the restored signal again and display
+% them.
+%
+
+%% 
+%%
+% _Ilker Bayram,_ 
+% _Istanbul Teknik Universitesi, 2015_
+
+##### SOURCE END #####
+--></body></html>

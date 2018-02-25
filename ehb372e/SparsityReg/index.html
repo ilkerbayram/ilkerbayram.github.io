@@ -1,0 +1,370 @@
+﻿
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><script type="text/x-mathjax-config">  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script> <script type="text/javascript"  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EHB 372E - Week 12: Sparsity Regularization</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-20"><meta name="DC.source" content="Sparsity.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>EHB 372E - Week 12: Sparsity Regularization</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Denoising</a></li><li><a href="#7">Estimating $\sigma$ with MAD</a></li><li><a href="#8">Deconvolution</a></li><li><a href="#20">In-Class Assignment</a></li></ul></div><h2>Denoising<a name="1"></a></h2><p>Suppose we are interested in an image $x$ but observe a noisy version $y = x + n$, where $n$ denotes noise (with possibly unknown statistics). Estimating $x$ from $y$ is called a denoising problem. Below is an example of a noisy image.</p><pre class="codeinput">x = imread(<span class="string">'house.bmp'</span>); <span class="comment">% this is the desired image, which is unknown to us</span>
+x = double(x);
+
+sigma = 40; <span class="comment">% noise standard deviation</span>
+
+y = x + sigma * randn( size(x) ); <span class="comment">% this is what we observe</span>
+
+figure;
+imagesc(y);
+colormap(gray); axis <span class="string">image</span>; title(<span class="string">'Noisy Image'</span>);
+</pre><img vspace="5" hspace="5" src="Sparsity_01.png" alt=""> <p>We will make use of the Haar wavelet transform for denoising. Recall that few of the wavelet coefficients of a natural image have high magnitudes and most are close to zero. However, if we were to look at the wavelet coefficients of noise, we would see that the distribution is more uniform. Therefore, the wavelet coefficients of a noisy image contain a noise floor. We can remove a significant portion of the noise energy if we eliminate the coefficients that have low magnitude. Here's a mesh plot of the coefficients of the clean and the noisy images to demonstrate this discussion. Below, the lowpass coefficients are suppressed for better visualization because they are typically very high compared to the rest of the coefficients.</p><pre class="codeinput">J = 5; <span class="comment">% number of wavelet stages</span>
+
+cx = HaarDWT( x, J );
+cx( 1 : end/2^J, 1 : end/2^J ) = 0; <span class="comment">% suppress the lowpass coefficients for mesh plot</span>
+figure;
+mesh( abs(cx) );
+title(<span class="string">'Haar Coefficients of the Clean Image'</span>);
+
+cy = HaarDWT( y, J );
+cy( 1 : end/2^J, 1 : end/2^J ) = 0; <span class="comment">% suppress the lowpass coefficients for mesh plot</span>
+figure;
+mesh( abs(cy) );
+title(<span class="string">'Haar Coefficients of the Noisy Image'</span>);
+</pre><img vspace="5" hspace="5" src="Sparsity_02.png" alt=""> <img vspace="5" hspace="5" src="Sparsity_03.png" alt=""> <p>To eliminate the coefficients, we will apply the soft-threshold function. For a given threshold value $\tau$, this function is defined as, $$ S(x,\tau) = \begin{cases} x - \tau &amp; \text{if } \tau &lt; x, \\ 0, &amp;\text{if }|x|&lt; \tau, \\ x+\tau &amp;\text{if }x &lt; -\tau. \end{cases}$$ Let us sketch this function.</p><pre class="codeinput">tau = 1; <span class="comment">% threshold level</span>
+t = -5:0.01:5;
+St = max( abs(t) - tau, 0 ) .* sign( t );
+figure;
+plot(t,St);
+axis <span class="string">image</span>; grid <span class="string">on</span>; title(<span class="string">'Soft-Threshold Function'</span>);
+</pre><img vspace="5" hspace="5" src="Sparsity_04.png" alt=""> <p>For today's in-class assignment, you are asked to write a function 'Denoise' that does wavelet-domain soft thresholding. See below for the details.</p><pre class="codeinput">J = 5; <span class="comment">% number of stages to use in the wavelet transform</span>
+tau = 1.5 * sigma; <span class="comment">% the threshold level</span>
+z = Denoise( y, tau, J );
+</pre><p>A threshold value $\tau$ in the range $[\sigma, 3 \sigma]$ usually gives a good reconstruction.</p><pre class="codeinput">figure;
+imagesc(z);
+colormap(gray); axis <span class="string">image</span>; title(<span class="string">'Denoised Image'</span>);
+
+cz = HaarDWT( z, J );
+cz( 1 : end/2^J, 1 : end/2^J ) = 0; <span class="comment">% suppress the lowpass coefficients for mesh plot</span>
+figure;
+mesh( abs(cz) );
+title(<span class="string">'Haar Coefficients of the Denoised Image'</span>);
+</pre><img vspace="5" hspace="5" src="Sparsity_05.png" alt=""> <img vspace="5" hspace="5" src="Sparsity_06.png" alt=""> <p>Notice that noise is suppressed to an extent but at the expense of some distortion in the image. Specifically, we see a blocky appearance due to the use of the Haar transform.</p><h2>Estimating $\sigma$ with MAD<a name="7"></a></h2><p>In practice, we might not always know the value of the noise standard deviation. To estimate $\sigma$, a useful estimator is the Median Absolute Deviation (MAD). Given a vector $x = [x_1, \ldots, x_n]$, MAD is the median of $|x_i - m|$, where $m$ is the median of $x$. We will employ MAD on the highpass coefficients of the observations to estimate 's'. We also take the median of the data to be 0.</p><pre class="codeinput">c = cy( end/2 + 1 : end, end/2 + 1 : end); <span class="comment">% crop the highpass coefficients</span>
+
+MADs = median( abs( c(:) ) );
+
+MADs / sigma
+</pre><pre class="codeoutput">
+ans =
+
+    0.6809
+
+</pre><h2>Deconvolution<a name="8"></a></h2><p>Suppose $x$ is an image of interest but we observe $$y = Hx + n,$$ where $H$ is a convolution operator and $n$ denotes noise. That is, we observe a blurred and noisy version of $x$. Our goal is to reconstruct $x$ from $y$. One example is shown below.</p><pre class="codeinput">x = imread(<span class="string">'cameraman.png'</span>); <span class="comment">% this is the desired image, which is unknown to us</span>
+x = double(x);
+
+K = 11;
+h = ones(11,11) / K^2; <span class="comment">% blurring kernel</span>
+
+sigma = 0.1; <span class="comment">% this is the noise variance, assumed to be known</span>
+
+y = conv2( x, h, <span class="string">'same'</span> ) + sigma * randn( size(x) ); <span class="comment">% the observation</span>
+
+figure;
+imagesc(y);
+colormap(gray); axis <span class="string">image</span>; title(<span class="string">'Blurred Observation'</span>);
+</pre><img vspace="5" hspace="5" src="Sparsity_07.png" alt=""> <p>Note that if $H$ were invertible, we could estimate $x$ as $$\hat{x} = H^{-1}\,y.$$ However, the operator $H$ is very ill-conditioned for this example. The iterated shrinkage/thresholding algorithm (ISTA) provides a solution for the minimization problem $$ \min_t \frac{1}{2} \| y - H\,W\,t \|_2^2 + \lambda \| t \|_1.$$ Here, $W$ is the inverse Haar DWT function. ISTA is an iterative algorithm. That is, we construct a sequence of wavelet coefficients $t^n$ which converge to the solution of the minimization problem above. Given $t^n$, we obtain $t^{n+1}$ as follows. Note that we use an intermediate image $z^n$. $$z^n := t^n + \alpha^{-1}\,W^T\,H^T\, \Bigl( y - H\,W\,t^n \Bigr)$$ $$t^{n+1} := S(z^n, \alpha^{-1}\,\lambda)$$ Here, $\alpha$ is a step parameter which affects the rate of convergence. Take $\alpha$ to be the sum of the absolute values of the filter coefficients. Notice that the second step is a soft-threshold with threshold equal to $\lambda / \alpha$. After a sufficient number of iterations, we end up with an approximate solution of the minimization problem, $t^*$. To obtain the deblurred image, apply an inverse Haar wavelet transform. Also, you need a $t^0$ to start the iterations. You can set $t^0$ to be the Haar wavelet coefficients of $y$.</p><p>The algorithm requires the transpose of the operator $H\,W$. Note that this is given as $W^T\,H^T$. We need the transposes of $W$ and $H$. The transpose of $W$ is equivalent to applying the HaarDWT. The transpose of $H$ is equivalent to applying a space-reversed version of $H$. Here are the ingredients in Matlab :</p><p><i><b>Realizing $W$:</b></i></p><p>Remember that $W$ is the inverse Haar DWT function. Suppose $x = W c$. Then, given $c$, we can obtain  $x$ as</p><pre class="codeinput">x = HaarIDWT( c, J ); <span class="comment">% J is the number of stages.</span>
+</pre><p><i><b>Realizing $W^T$:</b></i></p><p>Since the Haar DWT is an orthonogmal transform, $W^T$ is the Haar DWT function. Suppose $c = W^T x$. Then, given $x$, we can obtain  $c$ as</p><pre class="codeinput">c = HaarDWT( x, J );
+</pre><p><i><b>Realizing $H$:</b></i></p><p>Suppose $z = H x$. Then, given $x$, we form $z$ for this experiment as</p><pre class="codeinput">z = conv2( x, h, <span class="string">'same'</span> ); <span class="comment">% use the filter H given above</span>
+</pre><p><i><b>Realizing $H^T$:</b></i></p><p>If $H$ denotes the convolution operator with $h$, $H^T$ corresponds to a convolution with a time reversed version of $h$. Suppose $z = H^T\,x$. Then, given $x$, we form $z$ for this experiment as</p><pre class="codeinput">ht = h( end:-1:1, end:-1:1 ); <span class="comment">% for this experiment, ht = h because the filter is symmetric</span>
+z = conv2( x, ht, <span class="string">'same'</span> );
+</pre><p>Here's what you should expect to see. Notice that deconvolution does not perfectly give back the original image. Nevertheless, the effect of blur is significantly removed. Observe also the blocky appearance of the deconvolved image. That is due to the use of the Haar DWT.</p><pre class="codeinput">MAX_ITER = 1000;
+z = ISTA( y, h, sigma, J, MAX_ITER );
+
+figure;
+imagesc(z);
+colormap(gray); axis <span class="string">image</span>; title(<span class="string">'Deconvolved Image'</span>);
+</pre><img vspace="5" hspace="5" src="Sparsity_08.png" alt=""> <h2>In-Class Assignment<a name="20"></a></h2><p>(1) Write a function 'Denoise.m' that takes as input a noisy image and applies a soft-threshold in the Haar wavelet domain. Your function header should look like :</p><pre class="language-matlab"><span class="keyword">function</span> [z] = Denoise( x, J, tau )
+</pre><p>where x is the noisy image, J is the number of stages that the Haar DWT uses and tau is the threshold level. Apply your function to the noisy image shown below. Use MAD to estimate the noise standard deviation $\sigma$ and select a threshold based on your estimate of $\sigma$.</p><p><img vspace="5" hspace="5" src="noisy.bmp" alt=""> </p><p>(2) Write a function 'ISTA' that takes as input a blurred image along with the blurring kernel and applies ISTA to return a deconvolved image. Your function header should look like :</p><pre class="language-matlab"><span class="keyword">function</span> [z] = ISTA( x, h, tau, J, MAX_ITER )
+</pre><p>where x is the noisy and blurred image, h is the blurring kernel, tau is the threshold level, J is the number of stages for the Haar DWT, and MAX_ITER is the number of iterations. Display the result you obtain by deconvolving the image below, which is blurred with the kernel h given above in the code.</p><p><img vspace="5" hspace="5" src="blurred.bmp" alt=""> </p><p>Here is a short document explaining the derivation of ISTA : <a href="MM.pdf">[ISTA.pdf]</a></p><p><i>Ilker Bayram, Istanbul Teknik Universitesi, 2015</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% EHB 372E - Week 12: Sparsity Regularization
+% 
+%% Denoising
+% Suppose we are interested in an image $x$ but observe a noisy version
+% $y = x + n$, where $n$ denotes noise (with possibly unknown
+% statistics). Estimating $x$ from $y$ is called a denoising problem.
+% Below is an example of a noisy image.
+
+x = imread('house.bmp'); % this is the desired image, which is unknown to us
+x = double(x);
+
+sigma = 40; % noise standard deviation
+
+y = x + sigma * randn( size(x) ); % this is what we observe
+
+figure;
+imagesc(y);
+colormap(gray); axis image; title('Noisy Image');
+
+%%
+% We will make use of the Haar wavelet transform for denoising. Recall that
+% few of the wavelet coefficients of a natural image have high magnitudes
+% and most are close to zero. However, if we were to look at the wavelet
+% coefficients of noise, we would see that the distribution is more
+% uniform. Therefore, the wavelet coefficients of a noisy image contain a
+% noise floor. We can remove a significant portion of the noise energy if we eliminate 
+% the coefficients that have low magnitude. Here's a mesh plot of the coefficients of the clean and the noisy images to
+% demonstrate this discussion. Below, the lowpass coefficients are
+% suppressed for better visualization
+% because they are typically very high compared to the rest of the
+% coefficients.
+
+J = 5; % number of wavelet stages
+
+cx = HaarDWT( x, J );
+cx( 1 : end/2^J, 1 : end/2^J ) = 0; % suppress the lowpass coefficients for mesh plot
+figure;
+mesh( abs(cx) ); 
+title('Haar Coefficients of the Clean Image');
+
+cy = HaarDWT( y, J );
+cy( 1 : end/2^J, 1 : end/2^J ) = 0; % suppress the lowpass coefficients for mesh plot
+figure;
+mesh( abs(cy) );
+title('Haar Coefficients of the Noisy Image');
+
+%% 
+% To eliminate the coefficients, we will apply the soft-threshold function.
+% For a given threshold value $\tau$, this function is defined as,
+% $$ S(x,\tau) = \begin{cases} x - \tau & \text{if } \tau < x, \\ 0, &\text{if }|x|< \tau, \\ x+\tau &\text{if }x < -\tau. \end{cases}$$
+% Let us sketch this function.
+
+tau = 1; % threshold level
+t = -5:0.01:5;
+St = max( abs(t) - tau, 0 ) .* sign( t );
+figure;
+plot(t,St); 
+axis image; grid on; title('Soft-Threshold Function');
+%%
+% For today's in-class assignment, you are asked to write a function
+% 'Denoise' that does wavelet-domain soft thresholding. See below for the
+% details.
+
+J = 5; % number of stages to use in the wavelet transform
+tau = 1.5 * sigma; % the threshold level
+z = Denoise( y, tau, J );
+%%
+% A threshold value $\tau$ in the range $[\sigma, 3 \sigma]$ usually gives a good reconstruction.
+
+figure;
+imagesc(z);
+colormap(gray); axis image; title('Denoised Image');
+
+cz = HaarDWT( z, J );
+cz( 1 : end/2^J, 1 : end/2^J ) = 0; % suppress the lowpass coefficients for mesh plot
+figure;
+mesh( abs(cz) );
+title('Haar Coefficients of the Denoised Image');
+%%
+% Notice that noise is suppressed to an extent but at the expense of some distortion in the image. Specifically, we see a blocky appearance due to the use of the Haar 
+% transform. 
+
+%% Estimating $\sigma$ with MAD
+% In practice, we might not always know the value of the noise standard
+% deviation. To estimate $\sigma$, a useful estimator is the Median
+% Absolute Deviation (MAD). Given a vector $x = [x_1, \ldots, x_n]$, MAD
+% is the median of $|x_i - m|$, where $m$ is the median of $x$.
+% We will employ MAD on the highpass coefficients of the observations
+% to estimate 's'. We also take the median of the data to be 0.
+
+c = cy( end/2 + 1 : end, end/2 + 1 : end); % crop the highpass coefficients
+
+MADs = median( abs( c(:) ) );
+
+MADs / sigma
+
+
+%% Deconvolution
+% Suppose $x$ is an image of interest but we observe
+% $$y = Hx + n,$$ where $H$ is a convolution operator and $n$ denotes
+% noise. That is, we observe a blurred and noisy version of $x$. Our goal
+% is to reconstruct $x$ from $y$. One example is shown below. 
+
+x = imread('cameraman.png'); % this is the desired image, which is unknown to us
+x = double(x);
+
+K = 11; 
+h = ones(11,11) / K^2; % blurring kernel
+
+sigma = 0.1; % this is the noise variance, assumed to be known
+
+y = conv2( x, h, 'same' ) + sigma * randn( size(x) ); % the observation
+
+figure;
+imagesc(y);
+colormap(gray); axis image; title('Blurred Observation');
+
+%%
+% Note that if $H$ were invertible, we could estimate $x$ as
+% $$\hat{x} = H^{-1}\,y.$$ However, the operator $H$ is very
+% ill-conditioned for this example. The iterated shrinkage/thresholding
+% algorithm (ISTA) provides a solution for the minimization problem
+% $$ \min_t \frac{1}{2} \| y - H\,W\,t \|_2^2 + \lambda \| t \|_1.$$ Here, $W$ is the inverse Haar DWT function. 
+% ISTA is an iterative algorithm. That is, we construct a sequence of
+% wavelet coefficients $t^n$ which converge to the solution of the minimization problem
+% above. Given $t^n$, we obtain $t^{n+1}$ as follows. Note that we use
+% an intermediate image $z^n$.
+% $$z^n := t^n + \alpha^{-1}\,W^T\,H^T\, \Bigl( y - H\,W\,t^n \Bigr)$$
+% $$t^{n+1} := S(z^n, \alpha^{-1}\,\lambda)$$
+% Here, $\alpha$ is a step parameter which affects the rate of
+% convergence. Take $\alpha$ to be the sum of the absolute values of the
+% filter coefficients. Notice that the second step is a soft-threshold with
+% threshold equal to $\lambda / \alpha$. After a sufficient number of
+% iterations, we end up with an approximate solution of the minimization
+% problem, $t^*$. To obtain the deblurred image, apply an inverse Haar
+% wavelet transform. Also, you need a $t^0$ to start the iterations. You
+% can set $t^0$ to be the Haar wavelet coefficients of $y$.
+
+%%
+% The algorithm requires the transpose of the operator $H\,W$. Note that this is given as 
+% $W^T\,H^T$. We need the transposes of $W$ and $H$. The transpose of
+% $W$ is equivalent to applying the HaarDWT. The transpose of
+% $H$ is equivalent to applying a space-reversed version of $H$. Here are the ingredients in Matlab :
+
+%% 
+% _*Realizing $W$:*_
+
+%%
+% Remember that $W$ is the inverse Haar DWT function. Suppose $x = W c$. Then, given $c$, we can obtain  $x$ as
+
+x = HaarIDWT( c, J ); % J is the number of stages.
+
+
+%% 
+% _*Realizing $W^T$:*_
+
+%%
+% Since the Haar DWT is an orthonogmal transform, $W^T$ is the Haar DWT function. Suppose $c = W^T x$. Then, given $x$, we can obtain  $c$ as
+
+c = HaarDWT( x, J );
+
+%%
+% _*Realizing $H$:*_
+
+%%
+% Suppose $z = H x$. Then, given $x$, we form $z$ for this experiment as
+
+z = conv2( x, h, 'same' ); % use the filter H given above
+
+%%
+% _*Realizing $H^T$:*_
+
+%%
+% If $H$ denotes the convolution operator with $h$, $H^T$ corresponds to a convolution with a time reversed version of $h$. Suppose $z = H^T\,x$. Then, given $x$, we form $z$ for this experiment as
+
+ht = h( end:-1:1, end:-1:1 ); % for this experiment, ht = h because the filter is symmetric
+z = conv2( x, ht, 'same' );
+
+%%
+% Here's what you should expect to see. Notice that deconvolution does not
+% perfectly give back the original image. Nevertheless, the effect of blur
+% is significantly removed. Observe also the blocky appearance of the
+% deconvolved image. That is due to the use of the Haar DWT.
+
+MAX_ITER = 1000;
+z = ISTA( y, h, sigma, J, MAX_ITER );
+
+figure;
+imagesc(z);
+colormap(gray); axis image; title('Deconvolved Image');
+
+%% In-Class Assignment
+% (1) Write a function 'Denoise.m' that takes as input a noisy image and
+% applies a soft-threshold in the Haar wavelet domain. Your function
+% header should look like :
+% 
+%   function [z] = Denoise( x, J, tau )
+% 
+% where x is the noisy image, J is the number of stages that the Haar DWT
+% uses and tau is the threshold level. Apply your function to the noisy
+% image shown below. Use MAD to estimate the noise standard deviation $\sigma$ and
+% select a threshold based on your estimate of $\sigma$.
+%
+% <<noisy.bmp>>
+%
+% (2) Write a function 'ISTA' that takes as input a blurred image along with the
+% blurring kernel and applies ISTA to return a deconvolved image. Your
+% function header should look like :
+% 
+%   function [z] = ISTA( x, h, tau, J, MAX_ITER )
+% 
+% where x is the noisy and blurred image, h is the blurring kernel, tau is the threshold level, J is the number of stages for the Haar DWT,
+% and MAX_ITER is the number of iterations. Display the result you obtain
+% by deconvolving the image below, which is blurred with the kernel h given above in the code.
+%
+% <<blurred.bmp>>
+%
+
+%%
+% Here is a short document explaining the derivation of ISTA : <MM.pdf [ISTA.pdf]> 
+%%
+% _Ilker Bayram, Istanbul Teknik Universitesi, 2015_
+##### SOURCE END #####
+--></body></html>

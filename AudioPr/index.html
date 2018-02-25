@@ -1,0 +1,96 @@
+﻿<!DOCTYPE HTML PUBLIC 
+"-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>A Simple Prior for Audio Signals </title>
+<link rel="stylesheet" href="../stil.css" />
+
+</head>
+<body>
+<br/>
+<br/>
+<p>
+<A href="../">Home<A>
+
+<hr/>
+
+<h1> A Simple Prior for Audio Signals </h1>
+
+<hr/>
+<h4> Manuscript </h4>
+<p> "A Simple Prior for Audio Signals", İ. Bayram, M. Kamasak, August, 2012. [<a href="AudioPrior.pdf">.pdf</a>]
+
+<hr/>
+
+<h4> Software </h4>
+<p> The file <a href="SimplePriorToolbox.zip">SimplePriorToolbox.zip<a>  contains Matlab implementations of the experiments in the manuscript.
+
+<hr/>
+
+<h4> Description </h4>
+
+<p> The manuscript proposes a function that assumes low values, for audio or oscillatory signals whose frequency content varies smoothly over time. This property allows the proposed function to be used as a 'signal prior' in problems that involve audio or other oscillatory signals. 
+
+<p> The prior is computed as follows.
+<p>(i) We first compute the time-frequency samples of the signal, which can be realized by computing the STFT (or possibly some constant-Q transform)
+<p>(ii) To the time-frequency samples, we apply a phase corrected difference operator where the difference is computed along each subband.
+<p>(iii) We then sum the absolute values of the resulting phase corrected difference image.
+
+<p>In step (ii), the phase corrected difference operator depends on the parameters of the STFT (or the wavelet transform), but is fixed otherwise - i.e. it does not depend on the signal.
+
+
+<h4> Experiments </h4>
+<p> Below are some results from the manuscript.
+
+<br/>
+
+
+<h5> Experiment 1 (Denoising)  </h5> 
+<p> <a href="results/tanbur.wav"> Clean Signal<a>,   <a href="results/tanburN.wav">Noisy Observation <a> (SNR = 17.59 dB)
+<p> Denoised Signals Using
+<br/>  1)<a href="results/tanburD.wav">The Proposed Prior <a> (SNR = 24.95 dB), 2)<a href="results/RecYu.wav"> The Block-Thresholder from [*] <a> (SNR = 23.90 dB).
+
+<p>[*] G. Yu, S. Mallat and E. Bacry, "Audio denoising by time-frequency block thresholding", IEEE TSP, 56(5) : 1830-1839, May 2008.
+
+<h5> Experiment 2 (Denoising a Glockenspiel)  </h5> 
+<p> <a href="results/glockenspiel.wav"> Original Signal<a>,   <a href="results/DenGlock.wav">'Denoised' Signal<a>, <a href="results/ResGlock.wav"> Residual<a>.
+
+<p>This experiment demonstrates that (denoising with) the prior favors tonal components compared to transient components. Please notice that here our aim is not to decompose the audio signal into its tonal and transient components. In fact, this experiment points to a shortcoming of the prior -- although transient signals like attacks, clicks etc. are audio signals of potential interest, they are not handled well by the proposed prior.
+
+<br/>
+<br/>
+
+<h5> Experiment 3 (Missing Segment Recovery)  </h5> 
+
+<p><a href="results/tanburM.wav">Observation with Missing Segments<a>,   <a href="results/tanburR.wav"> Reconstruction<a>.
+
+
+<h5> Further Denoising Experiments </h5>
+
+<h5> Speech </h5>
+
+<p> The results below do not appear in the manuscript.
+
+<p> <a href="results/NoisySpeech.wav"> Noisy Speech<a> (SNR = 5 dB), <a href="results/DenoisedSpeech.wav"> Denoised Speech<a> (SNR = 11.92 dB)
+
+<center>
+<img src="spectro/NoisySpeech.png"/> <img src="spectro/DenoisedSpeech.png"/> 
+</center>
+
+<p> This result is not the best in terms of SNR but is more pleasing perceptually. The ones with a higher SNR (obtained with a smaller lambda -- see the manuscript) are richer in terms of the content in the high frequency regions but they contain musical noise.
+
+<h5> Violin Vibrato </h5>
+
+<p> <a href="results/NoisyVibrato.wav"> Noisy Violin Vibrato<a> (SNR = 5 dB), <a href="results/DenoisedVibrato.wav"> Denoised Vibrato<a> (SNR = 15.54 dB)
+
+<center>
+<img src="spectro/NoisyVibrato.png"/> <img src="spectro/DenoisedVibrato.png"/> 
+</center>
+
+<p> Violin vibrato is an example of a signal that is not expected to be well handled by the prior, since its frequency varies rapidly. However, it turns out that the frequency variation can be handled in practice. Nevertheless, one can hear the musical noise in this example.
+
+
+ 
+</body>
+</html>

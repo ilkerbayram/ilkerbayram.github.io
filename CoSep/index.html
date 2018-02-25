@@ -1,0 +1,191 @@
+﻿<!DOCTYPE HTML PUBLIC 
+"-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Algorithms for Audio Decomposition Using Mixed Norms </title>
+<link rel="stylesheet" href="../stil.css" />
+
+</head>
+<body>
+<br/>
+<br/>
+<p>
+<A href="../">Home<A>
+
+<hr/>
+
+<h1> Algorithms for Audio Decomposition Using Mixed Norms </h1>
+
+<hr/>
+<h4> Manuscript </h4>
+<p> "Algorithms for Audio Decomposition Using Mixed Norms", İ. Bayram, Ö. D. Akyıldız, August, 2012. [<a href="CoSep.pdf">.pdf</a>]
+
+<hr/>
+<h4> Software </h4>
+<p> The file <a href="PDToolbox.zip">PDToolbox.zip<a>  contains Matlab implementations of the experiments in the manuscript.
+
+<hr/>
+
+<h4> Experiments </h4>
+<p> Below are some results from the manuscript.
+
+
+
+</p>
+
+<h4> Restoration Experiment </h4>
+
+
+<p>
+The original signal is an old recording of a kaval tune. The signal contains artifacts due to recording.
+<br/>
+
+Two attempts to clean the signal are made.
+<br/>
+First, we denoise the signal using mixed norms. 
+<br/>
+Second, the restoration is performed by separating the artifacts and the tune of interest. See the manuscript for details.
+
+<br/>
+<br/>
+
+
+<a href="results/8.wav"> Original Signal<a>, 
+<a href="results/KDen.wav">Denoised Signal<a>,
+<a href="results/KRes.wav">Restored Signal<a>. 
+</p>
+
+<h4> Separation of Ney and Darbuka </h4>
+
+<p>
+
+<a href="results/ND.wav"> Mixture signal<a> (Ney + Darbuka)
+
+<br/>
+<br/>
+
+Analysis Prior  : <a href="results/AnaN.wav"> Ney<a>, 
+<a href="results/AnaD.wav">Darbuka <a> 
+<br/>
+<br/>
+
+Synthesis Prior  : <a href="results/SynN.wav"> Ney<a>, 
+<a href="results/SynD.wav">Darbuka <a> 
+<br/>
+<br/>
+
+Heuristic Scheme  : <a href="results/HeurN.wav"> Ney<a>, 
+<a href="results/HeurD.wav">Darbuka <a> 
+
+<h4> Further Results </h4>
+
+<h5> Another Old Recording </h5>
+
+<p> The signal is an excerpt from "Taxim Zeybekiko". The signal contains crackles and our aim is to suppress them using the decomposition formulation. This problem could be regarded as a variation of the denoising problem discussed above. Notice that although the noise in this signal (i.e., crackles) is different in nature from the noise in the phonogram signal, it is also far from being Gaussian.
+
+<p> <a href="results/TaximInp.wav">  Mixture Signal <a>
+
+
+<center>
+<p> Spectrogram of the Mixture Signal
+<p><img src="spectro/TaximInp.png"/>
+</center>
+
+
+<p> Below are the component separation results with the analysis and synthesis prior formulations.
+The same parameters as in the Restoration Experiment above are used (see the Matlab Code).
+
+<p> Analysis Prior  : <a href="results/TaximATon.wav"> Tonal Component<a>, 
+<a href="results/TaximATr.wav">Transient Component<a> 
+
+<p> Synthesis Prior  : <a href="results/TaximSTon.wav"> Tonal Component<a>, 
+<a href="results/TaximSTr.wav">Transient Component<a> 
+
+<p> Heuristic Scheme : <a href="results/TaximHTon.wav"> Tonal Component<a>, 
+<a href="results/TaximHTr.wav">Transient Component<a> 
+
+
+<p> The spectrograms for the components obtained by the analysis prior formulation :
+
+
+<center>
+<p><img src="spectro/TaximATon.png"/><img src="spectro/TaximATr.png"/>
+</center>
+
+
+<p> The spectrograms for the components obtained by the synthesis prior formulation :
+
+
+<center>
+<p><img src="spectro/TaximSTon.png"/><img src="spectro/TaximSTr.png"/>
+</center>
+
+<p> The spectrograms for the components obtained by the heuristic scheme :
+
+
+<center>
+<p><img src="spectro/TaximHTon.png"/><img src="spectro/TaximHTr.png"/>
+</center>
+
+
+<h5> Separation of Percussion </h5>
+
+<p> Here, we are mainly interested in the capability of the model to separate the drums. Notice that this is not necessarily what tonal and transient component analysis aims to achieve.
+
+<p> <a href="results/AteisInp.wav">  Mixture Signal <a>
+
+
+<center>
+<p> Spectrogram of the Mixture Signal
+<p><img src="spectro/AteisInp.png"/>
+</center>
+
+
+<p> Below are the component separation results with the analysis and synthesis prior formulations.
+The same parameters as in the Restoration Experiment above are used (see the Matlab Code).
+
+<p> Analysis Prior  : <a href="results/AteisATon.wav"> Tonal Component<a>, 
+<a href="results/AteisATr.wav">Transient Component<a> 
+
+<p> Synthesis Prior  : <a href="results/AteisSTon.wav"> Tonal Component<a>, 
+<a href="results/AteisSTr.wav">Transient Component<a> 
+
+<p> Heuristic Scheme  : <a href="results/AteisHTon.wav"> Tonal Component<a>, 
+<a href="results/AteisHTr.wav">Transient Component<a> 
+
+
+<p> The spectrograms for the components obtained by the analysis prior formulation :
+
+
+<center>
+<p><img src="spectro/AteisATon.png"/><img src="spectro/AteisATr.png"/>
+</center>
+
+
+<p> The spectrograms for the components obtained by the synthesis prior formulation :
+
+
+<center>
+<p><img src="spectro/AteisSTon.png"/><img src="spectro/AteisSTr.png"/>
+</center>
+
+
+<p> The spectrograms for the components obtained by the heuristic scheme :
+
+
+<center>
+<p><img src="spectro/AteisHTon.png"/><img src="spectro/AteisHTr.png"/>
+</center>
+
+
+<br/>
+<br/>
+
+
+
+<br/>
+<br/>
+</p>
+</body>
+</html>

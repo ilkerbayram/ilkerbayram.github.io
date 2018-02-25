@@ -1,0 +1,461 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><script type="text/x-mathjax-config">  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script> <script type="text/javascript"  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EHB372E Week-7 : Filter Design</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-03-16"><meta name="DC.source" content="FilterDesign.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>EHB372E Week-7 : Filter Design</h1><!--introduction--><p>We discuss filter design this week. Although there already exist built-in Matlab commands for designing filters (for instance 'firpm' - type 'help firpm' to see other related commands), we will discuss some simple methods.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Rect Filter</a></li><li><a href="#5">Bandpass/Highpass Filter From a Lowpass Filter via Modulation</a></li><li><a href="#8">Bandstop Filter Design</a></li><li><a href="#9">Optimum FIR Linear Phase Filter Design</a></li><li><a href="#11">Displaying the Spectrogram</a></li><li><a href="#14">In-Class Assignments</a></li></ul></div><h2>Rect Filter<a name="1"></a></h2><p>Possibly the simplest lowpass filter consists of a sequence of ones. Specifically, consider the filter whose $z$-transform is given as $$ H(z) = \sum_{k=-K}^K z^{-k}.$$ Evaluating this $z$-transform on $z = e^{j\omega}$, we obtain the DTFT. After some manipulations, we find that the DTFT may also be written as $$ H(e^{j\omega}) = \frac{\sin\bigl(\left(K+\frac{1}{2} \right) \omega \bigr)}{\sin\bigl(\frac{\omega}{2}\bigr)}.$$ This is called the 'digital sinc' function. Let us sketch this to gain some insight.</p><pre class="codeinput">K = 5;
+w = pi*(-1:0.01:1);
+H = sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+plot(w/pi,H); xlabel(<span class="string">'\omega / \pi'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_01.png" alt=""> <p>The peak of $|H(e^{j\omega})|$ occurs at $\omega = 0$ and is equal to $2K+1$ (why?). The first zeros occur at $\pm \omega_0$, where $\omega_0 = \pi/(K+1/2)$. We will call the interval $[-\omega_0, \omega_0]$ the mainlobe of the filter. We also observe that $|H(e^{j\omega})|$ decays as we move away from the origin. Therefore $h$ may be regarded as a lowpass filter. This lowpass filter is controlled by a single parameter, namely $K$, the filter length. Observe that the mainlobe shrinks with increasing $K$. To see this more concretely, let us sketch the DTFT for $K= 7$ too.</p><pre class="codeinput">K = 7;
+G = sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+hold <span class="string">on</span>;
+plot(w/pi,G,<span class="string">'r'</span>);
+legend(<span class="string">'K=5'</span>,<span class="string">'K=7'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_02.png" alt=""> <p>If we normalize the filters so that the maximum value of the frequency response is unity, we can compare the more easily.</p><pre class="codeinput">K = 5;
+H = (2*K+1)^(-1) * sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+K = 7;
+G = (2*K+1)^(-1) * sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+figure;
+plot(w/pi,H); hold <span class="string">on</span>; plot(w/pi,G,<span class="string">'r'</span>);
+xlabel(<span class="string">' \omega / \pi '</span>); legend(<span class="string">'K=5'</span>,<span class="string">'K=7'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_03.png" alt=""> <p>If we want to use this filter for processing a continuous-time signal, sampled at the frequency $f_s$, we need to convert the units of the frequency axis from radians/sample to Hz. To do that, remember that $f_s/2$ Hz corresponds to $\pi$ rad/sample. Thus the mainlobe of a rectangle filter of length $K$ is $[-f_0, f_0]$ Hz, where $f_0 = f_s/(2 K +1)$. Let us now convert the unit of the frequency axis to Hz, for $f_s = 16$ Khz.</p><pre class="codeinput">fs = 16000; <span class="comment">% this is the sampling frequency</span>
+f = ( 0.5 * fs/ pi ) * w;
+figure;
+plot(f,H); hold <span class="string">on</span>; plot(f,G,<span class="string">'r'</span>);
+xlabel(<span class="string">'Frequency (Hz)'</span>); legend(<span class="string">'K=5'</span>,<span class="string">'K=7'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_04.png" alt=""> <h2>Bandpass/Highpass Filter From a Lowpass Filter via Modulation<a name="5"></a></h2><p>We saw that 'rect' filter provides a simple lowpass filter. If we need a bandpass or highpass filter, we can shift the frequency response of the filter in the frequency domain via modulation. That is, suppose $h(k)$ is a given filter and $g(k) = e^{-j\omega_0 k}\,h(k)$, where $\omega_0$ is the modulation frequency. Then, the frequency responses of $h$ and $g$ are related as, $$ G(e^{j\omega}) = H(e^{j(\omega - \omega_0}).$$ It follows that if $g(k) = \cos(\omega_0 k)\,h(k)$, then, $$ G(e^{j\omega}) = \frac{1}{2} \bigl( H(e^{j(\omega - \omega_0}) + H(e^{j(\omega + \omega_0}) \bigr).$$ Note that the bandwidth of the filter is not affected by moduation. Therefore, to obtain a bandpass filter with center frequency $\omega_0$ and mainlobe width $M$ rad/sample, we can do as follows.</p><pre class="codeinput">w0 = 0.3*pi; <span class="comment">% this is the center frequency of the bandpass filter</span>
+M = 0.2*pi; <span class="comment">% this is the desired mainlobe width</span>
+<span class="comment">% w0 and M constitute the desired characteristics of the filter</span>
+K = round( 2*pi/M - 1/2) <span class="comment">% solve for the filter length that comes closest to the given mainlobe width</span>
+k = -K:K;
+g = cos( w0 * k ) / (2 * K + 1 ); <span class="comment">% the filter</span>
+[G,w] = freqz(g,512); <span class="comment">% use fft or freqz to view the frequency response</span>
+figure;
+plot(w/pi,abs(G));
+xlabel(<span class="string">'\omega / \pi'</span>);
+</pre><pre class="codeoutput">
+K =
+
+    10
+
+</pre><img vspace="5" hspace="5" src="FilterDesign_05.png" alt=""> <p>Note that the filter is of length $ 2K + 1 $ samples. If a wider mainlobe is sufficient, a shorter filter could be used (why?).</p><p>To obtain a highpass filter with the same mainlobe, we simply set $\omega_0 = \pi$.</p><pre class="codeinput">w0 = pi; <span class="comment">% this is the center frequency of the bandpass filter</span>
+
+g = cos( w0 * k ) / (2 * K + 1 ); <span class="comment">% the filter</span>
+nfft = 512; <span class="comment">% number of points in the DFT</span>
+G = fft(g,nfft);
+w = ( 0 : (nfft-1) ) * 2 * pi / nfft;
+figure;
+plot(w/pi,abs(G));
+xlabel(<span class="string">'\omega / \pi'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_06.png" alt=""> <p>If we wish to view the frequency response centered around $ \omega = 0$, we can use 'fftshift'. But we should be careful with 'w'.</p><pre class="codeinput">w = ( -(nfft/2-1) : nfft/2 ) * 2 * pi / nfft;
+plot( w / pi , fftshift( abs(G) ) );
+xlabel(<span class="string">'\omega / \pi'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_07.png" alt=""> <h2>Bandstop Filter Design<a name="8"></a></h2><p>So far we discussed filters that pass a band of frequencies. Suppose now that we are interested in stopping a narrowband. Recall that if the filter is symmetric, i.e., linear phase, the frequency response is a real-valued function. Suppose now that $H(e^{j\omega})$ is a bandpass filter with a real frequency response and the maximum value of the frequency response is achieved at $\pm \omega_0$ with $H(e^{j\omega_0})= 1$. In this case, the filter with frequency response $G(e^{j\omega})= 1 - H(e^{j\omega})$ will be a bandstop filter. But in the time-domain this means that $g(n) = \delta(n) - h(n)$. Let us check this.</p><pre class="codeinput">w0 = 0.3*pi;
+K = 20;
+k = -K:K;
+h = cos( w0 * k ); <span class="comment">% the bandpass filter</span>
+maxh = abs(h * exp(-1i*w0*k)'); <span class="comment">% the maximum of the frequency response occurs at w0 for this filter</span>
+h = h / maxh; <span class="comment">% normalize so that the maximum value is unity</span>
+delta = (k == 0); <span class="comment">% this is the delta function -- notice that the origin is in the middle of the sequence</span>
+g = delta - h; <span class="comment">% this is the bandstop filter</span>
+nfft = 512;
+w = (0:nfft-1)*2*pi/nfft;
+H = fft(h,nfft);
+G = fft(g,nfft);
+figure;
+plot( w/pi, abs(H) ); hold <span class="string">on</span>; plot( w/pi, abs(G), <span class="string">'r'</span> );
+legend(<span class="string">'Bandpass'</span>,<span class="string">'Bandstop'</span>);
+xlabel(<span class="string">'\omega / \pi'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_08.png" alt=""> <h2>Optimum FIR Linear Phase Filter Design<a name="9"></a></h2><p>We now discuss optimal filter design. There exist many 'optimal' procedures so let us first clarify what we mean by optimal. Suppose we are given a frequency response $F(e^{j\omega})$ and we are asked to find filter of length $N$ whose frequency response is as close as possible to $F$. Here, proximity to $F$ is measured in the following sense. If $H$ denotes the frequency response of the filter, we try to minimize the cost function defined as $$ C(H) = \int_{0}^{2\pi} | F(e^{j\omega}) - H(e^{j\omega}) |^2 d \omega.$$ For simplicity, let $F$ be real valued and suppose we are interested in designing a linear phase filter of Type-I. A filter $h(k)$ is said to be Type-I if $h(k) = h(-k)$ for any $k$. Notice that if such a filter is supported on $k \in [-K,K]$, then the frequency response can be written as $$H(e^{j\omega}) = \sum_{k = -K}^K\,h(k)\,e^{-j\omega k} = \sum_{k=0}^K\,a_k\,\cos(k\omega),$$ where $a_0 = h(0)$ and $a_k = 2 h(k)$ for $0&lt; k \leq K$. Therefore the minimization problem can be expressed in terms of the  vector $a$ as, $$ \min_a \int_{0}^{2\pi} | F(e^{j\omega}) - \sum_{k=0}^K a_k\,\cos( k \omega) |^2 d \omega. $$ The vector that achieves the minimum is given as (let me know if you are interested in how to solve this problem)</p><p>$$a_k = \frac{1}{\pi} \int_0^{2\pi} F(e^{j\omega})\,\cos(k \omega )\,d \omega $$ for $1 \leq k \leq K$, and $$a_0 = \frac{1}{2\pi} \int_0^{2\pi} F(e^{j\omega})\,d \omega.$$ Once we obtain $a_k$, we can easily obtain the filter coefficients $h(k)$ using the relation given above. Let us now find the optimal filters approximating the ideal lowpass filter with cut-off frequency $\omega_0 = 0.4\pi$. We note that we can find closed form expressions for $a_k$ for this example. But we can also compute it numerically.</p><pre class="codeinput">w = pi*(-1:0.01:1);
+F =  abs(w) &lt; 0.4*pi; <span class="comment">% this is the ideal frequency response.</span>
+
+<span class="comment">% compute the coefficients by numerical integration</span>
+dw = w(2) - w(1); <span class="comment">% this is dw -- do not forget to include this!</span>
+a(1) = sum(F) * dw / ( 2 * pi ) ; <span class="comment">% the first coefficient</span>
+<span class="keyword">for</span> k = 1:50,
+    c = cos(k*w);
+    a(k+1) = F * c' * dw / pi; <span class="comment">% the coefficient index starts from k = 1 !</span>
+<span class="keyword">end</span>
+
+<span class="comment">% form the filters of length 11, 21, 101.</span>
+K = 5;
+h1 = [a(K+1:-1:2)/2 a(1) a(2:K+1)/2 ];
+
+K = 10;
+h2 = [a(K+1:-1:2)/2 a(1) a(2:K+1)/2 ];
+
+K = 50;
+h3 = [a(K+1:-1:2)/2 a(1) a(2:K+1)/2 ];
+
+<span class="comment">% frequency responses</span>
+[H1,w] = freqz(h1);
+[H2,w] = freqz(h2);
+[H3,w] = freqz(h3);
+
+Fid = (w &lt; 0.4*pi); <span class="comment">% ideal frequency response</span>
+
+figure;
+plot(w/pi,Fid);
+hold <span class="string">on</span>;
+plot(w/pi,abs(H1),<span class="string">'r'</span>);
+plot(w/pi,abs(H2),<span class="string">'g'</span>);
+plot(w/pi,abs(H3),<span class="string">'k'</span>);
+xlabel(<span class="string">'\omega / \pi'</span>);
+legend(<span class="string">'Ideal'</span>, <span class="string">'Length = 11'</span>, <span class="string">'Length = 21'</span>,<span class="string">'Length = 101'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_09.png" alt=""> <p>Notice the Gibbs phenomenon !</p><h2>Displaying the Spectrogram<a name="11"></a></h2><p>Last week, we discussed how to compute and display the short time Fourier transform coefficients. In order to display the STFT coefficients for this week's assignment, you can either use your own code or Matlab's built-in command 'spectrogram'. Try 'help spectrogram' to find out more about this command - the idea is essentially the same as the STFT function you wrote last week. Below is a demonstration on 'Glock.wav';</p><pre class="codeinput">[x,fs] = wavread(<span class="string">'Glock.wav'</span>);
+<span class="comment">% parameters / variables to input to spectrogram</span>
+N = round(50*fs/1000); <span class="comment">% length of the window</span>
+win = hamming(N); <span class="comment">% you can try other windows...</span>
+Noverlap = round(3*N/4); <span class="comment">% this is 'N - hop-size'</span>
+nfft = N; <span class="comment">% number of fft points at each time-slice (we imlpicitly used 'N' last week)</span>
+<span class="comment">% compute the spectrogram</span>
+[S,f,t] = spectrogram(x,win,Noverlap,nfft,fs);
+figure;
+imagesc(t,f,10*log10(abs(S)));
+xlabel(<span class="string">'Time (sec)'</span>); ylabel(<span class="string">'Frequency (Hz)'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_10.png" alt=""> <p>Note that the spectrogram appears upside down compared to last week (lower frequencies are on top). Also, we see the whole frequency content in this image, which is arguably too much information to display. In order to zoom into the frequency components, here's an alternative for viewing frequencies up to Fmax Hz.</p><pre class="codeinput">Fmax = 6000;
+K = f &lt; Fmax;
+figure;
+imagesc(t,f(K),10*log10(abs(S(K,:))));
+xlabel(<span class="string">'Time (sec)'</span>); ylabel(<span class="string">'Frequency (Hz)'</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_11.png" alt=""> <p>How could we place the low frequencies in the bottom ?</p><h2>In-Class Assignments<a name="14"></a></h2><div><ol><li>Design a lowpass filter with mainlobe width 1000 Hz, where the sampling frequency is 48 Khz. Plot the frequency response of the filter you had. Make sure that the unit for the frequency axis is Hz.</li><li>Obtain three bandpass filters by modulating the filter above so that the center frequencies are $\omega_1 = 2000$ Hz, $\omega_2 = 3000$ Hz, $\omega_3 = 4000$ Hz. Plot the frequency responses as in (1) above.</li><li>Design a bandstop filter with center frequency 3000 Hz, with mainlobe width 1000 Hz.</li><li>Apply the filters to the signal 'Glock.wav' and listen to the filtered signal. Plot the spectrograms of the resulting signals. Label the axes properly.</li><li>Find an analytical expression for the coefficients $a_k$ related with the ideal filter discussed above.</li><li>Consider the triangular frequency response $F$ given below.</li></ol></div><pre class="codeinput">w = pi*(-1:0.01:1);
+F = (1 - abs( 2 * w / pi ) ) .* ( abs( w ) &lt;= pi/2) ;
+figure;
+plot(w/pi, F);
+xlabel(<span class="string">' \omega / \pi '</span>);
+</pre><img vspace="5" hspace="5" src="FilterDesign_12.png" alt=""> <p>Design a length-($2K+1$) optimal Type-I lowpass filter that approximates this frequency response for $K = 15, 25, 35$. Plot the frequency responses on the same figure so as to compare them.</p><p><i>Ilker Bayram, Istanbul Teknik Universitesi, 2015</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% EHB372E Week-7 : Filter Design
+% We discuss filter design this week. Although there already exist built-in Matlab commands for designing 
+% filters (for instance 'firpm' - type 'help firpm' to see other related commands), we will discuss some simple methods.
+
+%% Rect Filter
+% Possibly the simplest lowpass filter consists of a sequence of ones.
+% Specifically, consider the filter whose $z$-transform is given as
+% $$ H(z) = \sum_{k=-K}^K z^{-k}.$$
+% Evaluating this $z$-transform on $z = e^{j\omega}$, we obtain the
+% DTFT. After some manipulations, we find that the DTFT may also be written
+% as
+% $$ H(e^{j\omega}) = \frac{\sin\bigl(\left(K+\frac{1}{2} \right) \omega \bigr)}{\sin\bigl(\frac{\omega}{2}\bigr)}.$$
+% This is called the 'digital sinc' function. Let us sketch this to gain
+% some insight.
+
+K = 5;
+w = pi*(-1:0.01:1);
+H = sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+plot(w/pi,H); xlabel('\omega / \pi');
+
+%% 
+% The peak of $|H(e^{j\omega})|$ occurs at $\omega = 0$ and is equal to
+% $2K+1$ (why?). The first zeros occur at $\pm \omega_0$, where
+% $\omega_0 = \pi/(K+1/2)$. We will call the interval $[-\omega_0, \omega_0]$ the mainlobe of the filter.
+% We also observe that $|H(e^{j\omega})|$ decays as we move away from the
+% origin. Therefore $h$ may be regarded as a lowpass filter. This lowpass
+% filter is controlled by a single parameter, namely $K$, the filter
+% length. Observe that the mainlobe shrinks with increasing $K$. To see
+% this more concretely, let us sketch the DTFT for $K= 7$ too.
+
+K = 7;
+G = sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+hold on;
+plot(w/pi,G,'r'); 
+legend('K=5','K=7');
+
+%%
+% If we normalize the filters so that the maximum value of the frequency
+% response is unity, we can compare the more easily. 
+K = 5;
+H = (2*K+1)^(-1) * sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+K = 7;
+G = (2*K+1)^(-1) * sin( (K+0.5) * w ) ./ ( sin( 0.5 * w ) );
+figure;
+plot(w/pi,H); hold on; plot(w/pi,G,'r'); 
+xlabel(' \omega / \pi '); legend('K=5','K=7');
+
+%%
+% If we want to use this filter for processing a
+% continuous-time signal, sampled at the frequency $f_s$, we need to convert the units of the frequency axis from 
+% radians/sample to Hz. To do that, remember that $f_s/2$ Hz corresponds to
+% $\pi$ rad/sample. Thus the mainlobe of a rectangle filter of length $K$
+% is $[-f_0, f_0]$ Hz, where $f_0 = f_s/(2 K +1)$. Let us now convert
+% the unit of the frequency axis to Hz, for $f_s = 16$ Khz.
+fs = 16000; % this is the sampling frequency
+f = ( 0.5 * fs/ pi ) * w;
+figure;
+plot(f,H); hold on; plot(f,G,'r'); 
+xlabel('Frequency (Hz)'); legend('K=5','K=7');
+
+%% Bandpass/Highpass Filter From a Lowpass Filter via Modulation
+% We saw that 'rect' filter provides a simple lowpass filter. If we need a
+% bandpass or highpass filter, we can shift the frequency response of the
+% filter in the frequency domain via modulation. That is, suppose $h(k)$
+% is a given filter and $g(k) = e^{-j\omega_0 k}\,h(k)$, where $\omega_0$ is the modulation frequency.
+% Then, the frequency responses of $h$ and $g$ are related as,
+% $$ G(e^{j\omega}) = H(e^{j(\omega - \omega_0}).$$ 
+% It follows that if $g(k) = \cos(\omega_0 k)\,h(k)$, then,
+% $$ G(e^{j\omega}) = \frac{1}{2} \bigl( H(e^{j(\omega - \omega_0}) +
+% H(e^{j(\omega + \omega_0}) \bigr).$$ 
+% Note that the bandwidth of the filter is not affected by moduation.
+% Therefore, to obtain a bandpass filter with center frequency
+% $\omega_0$ and mainlobe width $M$ rad/sample, we can do as follows.
+
+
+w0 = 0.3*pi; % this is the center frequency of the bandpass filter
+M = 0.2*pi; % this is the desired mainlobe width
+% w0 and M constitute the desired characteristics of the filter
+K = round( 2*pi/M - 1/2) % solve for the filter length that comes closest to the given mainlobe width
+k = -K:K;
+g = cos( w0 * k ) / (2 * K + 1 ); % the filter
+[G,w] = freqz(g,512); % use fft or freqz to view the frequency response
+figure;
+plot(w/pi,abs(G));
+xlabel('\omega / \pi');
+
+%%
+% Note that the filter is of length $ 2K + 1 $ samples. If a wider
+% mainlobe is sufficient, a shorter filter could be used (why?).
+%
+% To obtain a highpass filter with the same mainlobe, we simply set
+% $\omega_0 = \pi$.
+
+w0 = pi; % this is the center frequency of the bandpass filter
+
+g = cos( w0 * k ) / (2 * K + 1 ); % the filter
+nfft = 512; % number of points in the DFT
+G = fft(g,nfft);
+w = ( 0 : (nfft-1) ) * 2 * pi / nfft;
+figure;
+plot(w/pi,abs(G));
+xlabel('\omega / \pi');
+
+%%
+% If we wish to view the frequency response centered around $ \omega =
+% 0$, we can use 'fftshift'. But we should be careful with 'w'.
+
+w = ( -(nfft/2-1) : nfft/2 ) * 2 * pi / nfft;
+plot( w / pi , fftshift( abs(G) ) ); 
+xlabel('\omega / \pi');
+
+%% Bandstop Filter Design
+% So far we discussed filters that pass a band of frequencies. 
+% Suppose now that we are interested in stopping a narrowband. 
+% Recall that if the filter is symmetric, i.e., linear phase, the frequency response is a real-valued function.
+% Suppose now that 
+% $H(e^{j\omega})$ is a bandpass filter with a real frequency response
+% and the maximum value of the frequency response is achieved at $\pm
+% \omega_0$ with $H(e^{j\omega_0})= 1$. In this case, the filter with
+% frequency response $G(e^{j\omega})= 1 - H(e^{j\omega})$ will be a
+% bandstop filter. But in the time-domain this means that $g(n) =
+% \delta(n) - h(n)$. Let us check this.
+
+w0 = 0.3*pi;
+K = 20;
+k = -K:K;
+h = cos( w0 * k ); % the bandpass filter
+maxh = abs(h * exp(-1i*w0*k)'); % the maximum of the frequency response occurs at w0 for this filter
+h = h / maxh; % normalize so that the maximum value is unity
+delta = (k == 0); % this is the delta function REPLACE_WITH_DASH_DASH notice that the origin is in the middle of the sequence
+g = delta - h; % this is the bandstop filter
+nfft = 512;
+w = (0:nfft-1)*2*pi/nfft;
+H = fft(h,nfft);
+G = fft(g,nfft);
+figure;
+plot( w/pi, abs(H) ); hold on; plot( w/pi, abs(G), 'r' );
+legend('Bandpass','Bandstop');
+xlabel('\omega / \pi');
+
+%% Optimum FIR Linear Phase Filter Design 
+% We now discuss optimal filter design. There exist many 'optimal'
+% procedures so let us first clarify what we mean by optimal. Suppose
+% we are given a frequency response $F(e^{j\omega})$ and we are asked to
+% find filter of length $N$ whose frequency response is as close as
+% possible to $F$. Here, proximity to $F$ is measured in the following sense. 
+% If $H$ denotes the frequency response of the filter, we try to minimize the cost function defined as
+% $$ C(H) = \int_{0}^{2\pi} | F(e^{j\omega}) - H(e^{j\omega}) |^2 d \omega.$$
+% For simplicity, let $F$ be real valued and suppose we are
+% interested in designing a linear phase filter of Type-I. 
+% A filter $h(k)$ is said to be Type-I if 
+% $h(k) = h(-k)$ for any $k$. Notice that if such a filter is
+% supported on $k \in [-K,K]$, then the frequency response can be written
+% as 
+% $$H(e^{j\omega}) = \sum_{k = -K}^K\,h(k)\,e^{-j\omega k} = \sum_{k=0}^K\,a_k\,\cos(k\omega),$$
+% where $a_0 = h(0)$ and $a_k = 2 h(k)$ for $0< k \leq K$. 
+% Therefore the minimization problem can be expressed in terms of the  vector $a$ as,
+% $$ \min_a \int_{0}^{2\pi} | F(e^{j\omega}) - \sum_{k=0}^K a_k\,\cos( k \omega) |^2 d \omega. $$
+% The vector that achieves the minimum is given as (let me know if you are interested in how to solve this problem)
+%
+% $$a_k = \frac{1}{\pi} \int_0^{2\pi} F(e^{j\omega})\,\cos(k \omega )\,d \omega $$ 
+% for $1 \leq k \leq K$, and 
+% $$a_0 = \frac{1}{2\pi} \int_0^{2\pi} F(e^{j\omega})\,d \omega.$$ 
+% Once we obtain $a_k$, we can easily obtain the filter coefficients $h(k)$ 
+% using the relation given above.
+% Let us now find the optimal filters approximating the ideal lowpass
+% filter with cut-off frequency $\omega_0 = 0.4\pi$. We note that we can
+% find closed form expressions for $a_k$ for this example. But we can
+% also compute it numerically.
+
+w = pi*(-1:0.01:1); 
+F =  abs(w) < 0.4*pi; % this is the ideal frequency response.
+
+% compute the coefficients by numerical integration
+dw = w(2) - w(1); % this is dw REPLACE_WITH_DASH_DASH do not forget to include this! 
+a(1) = sum(F) * dw / ( 2 * pi ) ; % the first coefficient
+for k = 1:50,
+    c = cos(k*w);    
+    a(k+1) = F * c' * dw / pi; % the coefficient index starts from k = 1 !  
+end
+
+% form the filters of length 11, 21, 101.
+K = 5;
+h1 = [a(K+1:-1:2)/2 a(1) a(2:K+1)/2 ];
+
+K = 10;
+h2 = [a(K+1:-1:2)/2 a(1) a(2:K+1)/2 ];
+
+K = 50;
+h3 = [a(K+1:-1:2)/2 a(1) a(2:K+1)/2 ];
+
+% frequency responses
+[H1,w] = freqz(h1);
+[H2,w] = freqz(h2);
+[H3,w] = freqz(h3);
+
+Fid = (w < 0.4*pi); % ideal frequency response
+
+figure;
+plot(w/pi,Fid);
+hold on;
+plot(w/pi,abs(H1),'r');
+plot(w/pi,abs(H2),'g');
+plot(w/pi,abs(H3),'k');
+xlabel('\omega / \pi');
+legend('Ideal', 'Length = 11', 'Length = 21','Length = 101');
+%%
+% Notice the Gibbs phenomenon !
+
+%% Displaying the Spectrogram
+% Last week, we discussed how to compute and display the short time Fourier
+% transform coefficients. In order to display the STFT coefficients for this week's assignment, you can either use
+% your own code or Matlab's built-in command 'spectrogram'. Try 'help
+% spectrogram' to find out more about this command - the idea is
+% essentially the same as the STFT function you wrote last week. Below is a
+% demonstration on 'Glock.wav';
+
+[x,fs] = wavread('Glock.wav');
+% parameters / variables to input to spectrogram
+N = round(50*fs/1000); % length of the window
+win = hamming(N); % you can try other windows...
+Noverlap = round(3*N/4); % this is 'N - hop-size'
+nfft = N; % number of fft points at each time-slice (we imlpicitly used 'N' last week)
+% compute the spectrogram
+[S,f,t] = spectrogram(x,win,Noverlap,nfft,fs);
+figure;
+imagesc(t,f,10*log10(abs(S)));
+xlabel('Time (sec)'); ylabel('Frequency (Hz)');
+
+%%
+% Note that the spectrogram appears upside down compared to last week (lower frequencies are on top).
+% Also, we see the whole frequency content in this image, which is arguably too much information to display.
+% In order to zoom into the frequency components, here's an alternative for viewing frequencies
+% up to Fmax Hz.
+
+Fmax = 6000;
+K = f < Fmax;
+figure;
+imagesc(t,f(K),10*log10(abs(S(K,:))));
+xlabel('Time (sec)'); ylabel('Frequency (Hz)');
+
+%% 
+% How could we place the low frequencies in the bottom ?
+
+%% In-Class Assignments
+% # Design a lowpass filter with mainlobe width 1000 Hz, where the sampling
+% frequency is 48 Khz. Plot the frequency response of the filter you had.
+% Make sure that the unit for the frequency axis is Hz.
+% # Obtain three bandpass filters by modulating the filter above so that
+% the center frequencies are $\omega_1 = 2000$ Hz, $\omega_2 = 3000$ Hz,
+% $\omega_3 = 4000$ Hz. Plot the frequency responses as in (1) above. 
+% # Design a bandstop filter with center frequency 3000 Hz, with mainlobe
+% width 1000 Hz.
+% # Apply the filters to the signal 'Glock.wav' and listen to the filtered signal. 
+% Plot the spectrograms of the resulting signals. Label the axes properly.
+% # Find an analytical expression for the coefficients $a_k$ related with the ideal filter discussed above.
+% # Consider the triangular frequency response $F$ given below.
+w = pi*(-1:0.01:1);
+F = (1 - abs( 2 * w / pi ) ) .* ( abs( w ) <= pi/2) ;
+figure;
+plot(w/pi, F);
+xlabel(' \omega / \pi ');
+%%
+% Design a length-($2K+1$) optimal Type-I lowpass filter that approximates this frequency
+% response for $K = 15, 25, 35$. Plot the frequency responses on the same
+% figure so as to compare them.
+
+%%
+% _Ilker Bayram, Istanbul Teknik Universitesi, 2015_
+##### SOURCE END #####
+--></body></html>

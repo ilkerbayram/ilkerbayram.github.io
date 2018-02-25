@@ -1,0 +1,234 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><script type="text/x-mathjax-config">  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script> <script type="text/javascript"  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>EHB372E - Week 8: IIR Filter Design</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-03-24"><meta name="DC.source" content="IIRFilter.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>EHB372E - Week 8: IIR Filter Design</h1><!--introduction--><p>We study IIR filters this week. Specifically, we will discuss the relation of an IIR filter with a difference equation, transformation of a continuous time filter to a discrete time IIR filter via the bilinear transform and a method to transform a lowpass filter to a bandpass filter.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Difference Equations</a></li><li><a href="#4">Bilinear Transform</a></li><li><a href="#6">Bandpass Transformation</a></li><li><a href="#8">In-Class Assignments</a></li></ul></div><h2>Difference Equations<a name="1"></a></h2><p>Consider a difference equation of the form $$ \sum_{k=1}^K\,a_k\,y(n-k) = \sum_{m = 1}^M\,b_m\,x(n-m).$$ If we take the DTFT of the both sides, we can express this equation as $$ \left( \sum_{k=1}^K\,a_k\,e^{j\omega k} \right)\,Y(e^{j\omega})= \left( \sum_{m=1}^M\,b_m\,e^{j\omega m} \right)\,X(e^{j\omega}).$$ This is equivalent to $Y(e^{j\omega}) = H(e^{j\omega})\,X(e^{j\omega})$, where $$ H(e^{j\omega})  = \frac{\sum_{m=1}^M\,b_m\,e^{j\omega m}}{\sum_{k=1}^K\,a_k\,e^{j\omega k}}.$$ Therefore, solving the difference equation is equivalent to filtering $x$ with a filter whose frequency response is $H$ (under zero initial rest conditions!). Notice that a difference equation is easy to implement with a 'for' loop. However, the difference equation may also be realized with the built-in Matlab command 'filter'. If the coefficients 'a' and 'b' above are as defined above, we can solve the difference equation as follows.</p><pre class="codeinput"><span class="comment">% filter coefficients</span>
+a = [1 -0.9];
+b = [1];
+
+<span class="comment">% the input</span>
+x = zeros(1,100);
+x(1) = 1;
+
+<span class="comment">% solution of the difference equation</span>
+y = filter(b,a,x);
+stem(y);
+</pre><img vspace="5" hspace="5" src="IIRFilter_01.png" alt=""> <p>The code above applies the filter whose frequency response is $(1 - 0.9\,e^{-j\omega})^{-1}$. Observe that $$ \frac{1}{1 - 0.9\,e^{-j\omega}} = \sum_{k=0}^{\infty}\,(0.9)^n\,e^{-j\omega n}.$$ Therefore the impulse response of the system is $h(n) = (0.9)^n \, u(n)$ and it has infinitely many non-zero taps. That is, the system is an infinite impulse response (IIR) system. Note also that the input used above is actually an impulse signal. Therefore, the output is the impulse response. Let us check that.</p><pre class="codeinput">y2 = 0.9.^(0:length(y)-1);
+hold <span class="string">on</span>;
+plot(y2,<span class="string">'r.'</span>,<span class="string">'MarkerSize'</span>,12);
+</pre><img vspace="5" hspace="5" src="IIRFilter_02.png" alt=""> <p>Note that implementing this system approximately using 'conv' would have required to store a very long sequence.</p><h2>Bilinear Transform<a name="4"></a></h2><p>One way to obtain a discrete time IIR filter is to convert a continuous time filter to a discrete time via the bilinear transform. The Matlab commands 'butter', 'cheby1', 'cheby2', 'ellip' make use of this principle to design discrete-time filters. But here, to demonstrate the idea, we will work on a simple example.</p><p>Consider a continuous time filter $h_c(t)$ whose transfer function is given as $H_c(s) = 1/(1+s)$. Note that the frequency response magnitude of this filter is, $$ | H_c(j\Omega) | = \left| \frac{1}{1 + j\Omega} \right| = \frac{1}{\sqrt{1 + \Omega^2}}. $$ Thus, $h$ is a lowpass filter. The bilinear transform obtains a discrete-time filter using the equality $$ s = \frac{2}{T}\,\frac{1 - z^{-1}}{1+ z^{-1}}.$$ Note that for $T = 1$, this gives a filter with transfer function $$ H(z) = \frac{1 + z^{-1}}{3 - 2 z^{-1}}.$$ Let us check the frequency response of this filter. We will use 'freqz' for this purpose.</p><pre class="codeinput"><span class="comment">% the coefficients of the IIR filter</span>
+a = [3 -2];
+b = [1 1];
+
+[H,w] = freqz(b,a); <span class="comment">% the frequency response</span>
+
+figure;
+plot(w/pi,abs(H)); <span class="comment">% the magnitude of the frequency response</span>
+xlabel(<span class="string">' \omega / \pi '</span>);
+</pre><img vspace="5" hspace="5" src="IIRFilter_03.png" alt=""> <h2>Bandpass Transformation<a name="6"></a></h2><p>We now discuss a transformation that converts a given discrete-time lowpass filter to a discrete-time bandpass filter. This is achieved by replacing $z$ with $$ - \left( \frac{cz + d }{dz + c} \right)^2.$$ Note that for the case $c =1$, $d = 0$, this is equivalent to replacing $z$ with $z^2$. Thus, for the filter $H(z) = (1 + z^{-1})/(3- 2 z^{-1})$, the new filter transfer function $G(z)$ is given as $$G(z) = H(-z^2) = \frac{1 - z^{-2}}{3 + 2 z^{-2}}.$$ Let us check the frequency response of this new filter.</p><pre class="codeinput"><span class="comment">% the coefficients of the transformed filter G</span>
+a = [3 0 2];
+b = [1 0 -1];
+
+[G,w] = freqz(b,a); <span class="comment">% the frequency response</span>
+
+figure;
+plot(w/pi,abs(G)); <span class="comment">% the magnitude of the frequency response</span>
+xlabel(<span class="string">' \omega / \pi '</span>);
+</pre><img vspace="5" hspace="5" src="IIRFilter_04.png" alt=""> <p>Observe that the peak of the frequency response magnitude has shifted from $\omega = 0$ (or $z = 1$)  to $\omega = \pi/2$ (or $z = i$). This is a consequence of $G(i) = H(1)$ (Why?). Notice that this in turn is a consequence of the choice $c =1$, $d = 0$. In the exercises, you change these parameters to shift the frequency peak to other locations.</p><h2>In-Class Assignments<a name="8"></a></h2><div><ol><li>Implement a system with transfer function $H(z) = 1/(1 - 0.7\,z^{-10000})$. Plot the first 51000 coefficients of the impulse response. Also plot the frequency response. Apply this filter to 'matematik.wav'. In order to better hear the effect, append $3\times f_s$ zeros to the audio signal, where $f_s$ is the sampling frequency (this means adding 3 seconds of silence). Describe what happens.</li><li>Apply the bilinear transform to the continuous time-filter with transfer function $H_4(s) = 1/(1+s^4)$. That is, replace $s$ with $(1-z^{-1})/(1+z^{-1})$. Plot the frequency response magnitude.</li><li>In the bandpass filter design section, we discussed a transformation which replaces $z$ with $ - (cz + d)^2/(dz + c)^2$. Specifically, we took $c =1$, $d = 0$. Using the same lowpass prototype filter, try $c = 1/2$, $d = \sqrt{3}/2$. Determine the peak frequency analytically and verify your answer by plotting the frequency response of the resulting $G$ filter.</li><li>For the previous question, find the coefficients $c$ and $d$ so that the peak of the frequency response occurs at (a) $\omega = \pi/4$, (b) $\omega = \pi/8$. For both cases, determine the filter coefficients and verify your answer by plotting the frequency response of the resulting filter.</li></ol></div><p><i>Ilker Bayram, Istanbul Teknik Universitesi, 2015</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% EHB372E - Week 8: IIR Filter Design
+% We study IIR filters this week. Specifically, we will discuss the
+% relation of an IIR filter with a difference equation, transformation of a
+% continuous time filter to a discrete time IIR filter via the bilinear
+% transform and a method to transform a lowpass filter to a bandpass
+% filter.
+
+%% Difference Equations
+% Consider a difference equation of the form
+% $$ \sum_{k=1}^K\,a_k\,y(n-k) = \sum_{m = 1}^M\,b_m\,x(n-m).$$
+% If we take the DTFT of the both sides, we can express this equation as
+% $$ \left( \sum_{k=1}^K\,a_k\,e^{j\omega k} \right)\,Y(e^{j\omega})= \left( \sum_{m=1}^M\,b_m\,e^{j\omega m} \right)\,X(e^{j\omega}).$$
+% This is equivalent to $Y(e^{j\omega}) =
+% H(e^{j\omega})\,X(e^{j\omega})$, where
+% $$ H(e^{j\omega})  = \frac{\sum_{m=1}^M\,b_m\,e^{j\omega m}}{\sum_{k=1}^K\,a_k\,e^{j\omega k}}.$$
+% Therefore, solving the difference equation is equivalent to filtering
+% $x$ with a filter whose frequency response is $H$ (under zero initial
+% rest conditions!). Notice that a difference equation is easy to
+% implement with a 'for' loop. However, the difference equation may also be
+% realized with the built-in Matlab command 'filter'. If the coefficients
+% 'a' and 'b' above are as defined above, we can solve the difference
+% equation as follows.
+
+% filter coefficients
+a = [1 -0.9];
+b = [1];
+
+% the input
+x = zeros(1,100);
+x(1) = 1;
+
+% solution of the difference equation
+y = filter(b,a,x);
+stem(y);
+
+%%
+% The code above applies the filter whose frequency response is $(1 -
+% 0.9\,e^{-j\omega})^{-1}$. Observe that
+% $$ \frac{1}{1 - 0.9\,e^{-j\omega}} =
+% \sum_{k=0}^{\infty}\,(0.9)^n\,e^{-j\omega n}.$$
+% Therefore the impulse response of the system is $h(n) = (0.9)^n \, u(n)$ and it has infinitely many non-zero taps.
+% That is, the system is an infinite impulse response (IIR) system.
+% Note also that the input used above is actually an impulse signal. Therefore,
+% the output is the impulse response. Let us check that.
+
+y2 = 0.9.^(0:length(y)-1);
+hold on;
+plot(y2,'r.','MarkerSize',12);
+
+%%
+% Note that implementing this system approximately using 'conv' would have required
+% to store a very long sequence. 
+
+%% Bilinear Transform
+% One way to obtain a discrete time IIR filter is to convert a
+% continuous time filter to a discrete time via the bilinear transform. 
+% The Matlab commands 'butter', 'cheby1', 'cheby2', 'ellip' make use of this principle to design discrete-time filters. 
+% But here, to demonstrate the idea, we will work on a simple example.
+%%
+% Consider a continuous time filter $h_c(t)$ whose transfer
+% function is given as $H_c(s) = 1/(1+s)$. Note that the frequency
+% response magnitude of this filter is,
+% $$ | H_c(j\Omega) | = \left| \frac{1}{1 + j\Omega} \right| =
+% \frac{1}{\sqrt{1 + \Omega^2}}. $$
+% Thus, $h$ is a lowpass filter. The bilinear transform obtains a discrete-time filter using the equality 
+% $$ s = \frac{2}{T}\,\frac{1 - z^{-1}}{1+ z^{-1}}.$$
+% Note that for $T = 1$, this gives a filter with transfer function
+% $$ H(z) = \frac{1 + z^{-1}}{3 - 2 z^{-1}}.$$ Let us check the
+% frequency response of this filter. We will use 'freqz' for this purpose.
+
+% the coefficients of the IIR filter
+a = [3 -2]; 
+b = [1 1];
+
+[H,w] = freqz(b,a); % the frequency response
+
+figure;
+plot(w/pi,abs(H)); % the magnitude of the frequency response
+xlabel(' \omega / \pi ');
+
+%% Bandpass Transformation
+% We now discuss a transformation that converts a given discrete-time
+% lowpass filter to a discrete-time bandpass filter. This is achieved by
+% replacing $z$ with
+% $$ - \left( \frac{cz + d }{dz + c} \right)^2.$$
+% Note that for the case $c =1$, $d = 0$, this is equivalent to
+% replacing $z$ with $z^2$. Thus, for the filter $H(z) = (1 +
+% z^{-1})/(3- 2 z^{-1})$, the new filter transfer function $G(z)$ is given as
+% $$G(z) = H(-z^2) = \frac{1 - z^{-2}}{3 + 2 z^{-2}}.$$ Let us check the
+% frequency response of this new filter.
+
+% the coefficients of the transformed filter G
+a = [3 0 2]; 
+b = [1 0 -1];
+
+[G,w] = freqz(b,a); % the frequency response
+
+figure;
+plot(w/pi,abs(G)); % the magnitude of the frequency response
+xlabel(' \omega / \pi ');
+
+%%
+% Observe that the peak of the frequency response magnitude has shifted
+% from $\omega = 0$ (or $z = 1$)  to $\omega = \pi/2$ (or $z = i$).
+% This is a consequence of $G(i) = H(1)$ (Why?). Notice that this
+% in turn is a consequence of the choice $c =1$, $d = 0$. In the exercises, you
+% change these parameters to shift the frequency peak to other locations.
+%% In-Class Assignments
+% # Implement a system with transfer function $H(z) = 1/(1 -
+% 0.7\,z^{-10000})$. Plot the first 51000 coefficients of the impulse response.
+% Also plot the frequency response. Apply this filter to 'matematik.wav'.
+% In order to better hear the effect, append $3\times f_s$ zeros to the
+% audio signal, where $f_s$ is the sampling frequency (this
+% means adding 3 seconds of silence).
+% Describe what happens.
+% # Apply the bilinear transform to the continuous time-filter with
+% transfer function $H_4(s) = 1/(1+s^4)$. That is, replace $s$ with $(1-z^{-1})/(1+z^{-1})$. Plot
+% the frequency response magnitude.
+% # In the bandpass filter design section, we discussed a transformation
+% which replaces $z$ with $ - (cz + d)^2/(dz + c)^2$.
+% Specifically, we took $c =1$, $d = 0$.
+% Using the same lowpass prototype filter, try $c = 1/2$, $d = \sqrt{3}/2$.
+% Determine the peak frequency analytically and verify your answer by
+% plotting the frequency response of the resulting $G$ filter.
+% # For the previous question, find the coefficients $c$ and $d$ so
+% that the peak of the frequency response occurs at (a) $\omega = \pi/4$,
+% (b) $\omega = \pi/8$. For both cases, determine the filter coefficients and verify your answer by plotting the frequency
+% response of the resulting filter.
+
+%%
+% _Ilker Bayram, Istanbul Teknik Universitesi, 2015_
+##### SOURCE END #####
+--></body></html>

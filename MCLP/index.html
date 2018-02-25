@@ -1,0 +1,255 @@
+﻿<!DOCTYPE HTML PUBLIC 
+"-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>MCLP for BSS</title>
+<link rel="stylesheet" href="../stil.css" />
+
+</head>
+<body>
+<br/>
+<br/>
+<p>
+<A href="../">Home<A>
+
+<hr/>
+
+<h1> Multi Channel Linear Prediction for Blind Source Separation </h1>
+
+<hr/>
+<h4> Manuscript </h4>
+<p> "Multichannel Linear Prediction for Blind Audio
+Source Separation", İ. Bayram, S. Bulek, January, 2017. [<a href="https://arxiv.org/pdf/1702.07713.pdf">arXiv</a>]
+
+
+<hr/>
+
+<h4> Experiments </h4>
+<p> Below are some results from the manuscript.
+
+
+<hr/>
+</p>
+
+<h4> Source Separation Experiment (Real Recordings) </h4>
+
+
+<p>
+The original signal is the mixture of two speakers recorded in a reverberant room with a circular microphone array. Below is the observation recorded at the first microphone.
+<br/>
+
+
+<p>
+<audio controls="controls">  
+   <source src="Observation.wav" />  
+</audio> 
+
+<p>Eight such observations are available. In order to demonstrate the effects of using an MCLP preprrocessing step, we provide the separation results with and without MCLP for the two sources. The sources are separated by approximately 0.75 &pi; radians. For separation, other than MCLP, a geometric source separation algorithm followed by a simple post-filter is utilized. The details can be found in the manuscript.
+
+
+<table>
+<tr>
+<td> </td>
+<td><center><p>Without MCLP</center></td>
+<td><center><p>With MCLP</center></td>
+</tr>
+<tr>
+<td><p>Source-1</td>
+<td><audio controls="controls">  
+   <source src="SepNoLP1.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="SepLP1.wav" />  
+</audio> 
+</td>
+</tr>
+<tr>
+<td><p>Source-2</td>
+<td><audio controls="controls">  
+   <source src="SepNoLP2.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="SepLP2.wav" />  
+</audio> 
+</td>
+</tr>
+</table>
+
+
+<h4> Minimum Variance Distortionless Response (MVDR) Processing </h4>
+
+<p> The primary claim in the paper is that MCLP boosts the performance of the subsequent separation step. 
+In order to demonstrate that MCLP complements separation methods other than that described in the paper, 
+we also tried separating the sources in the synthetic experiment above using the MVDR beamformer. 
+For comparison, we provide the reconstructions obtained using MVDR, and MCLP followed by MVDR.
+
+<table>
+<tr>
+<td> </td>
+<td><center><p>MVDR</center></td>
+<td><center><p>MCLP + MVDR</center></td>
+</tr>
+<tr>
+<td><p>Source-1</td>
+<td><audio controls="controls">  
+   <source src="female_mvdr.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="female_lp_mvdr.wav" />  
+</audio> 
+</td>
+</tr>
+<tr>
+<td><p>Source-2</td>
+<td><audio controls="controls">  
+   <source src="male_mvdr.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="male_lp_mvdr.wav" />  
+</audio> 
+</td>
+</tr>
+</table>
+
+
+
+<hr/>
+<h4> Synthetic Source Separation Experiment </h4>
+
+<p>
+In order to create the observations, we used two clean sources and the impulse responses obtained with the sine-sweep method. The impulse responses belong to the same circular array in the previous experiment but obtained in a relatively less reverberant room. The directions of the sources are separated by approximately 0.5 &pi; radians.
+<br/>
+
+<p> The mixture signal observed at the first microphone is right below. Both sources are clearly reverberant.
+<p>
+<audio controls="controls">  
+   <source src="Synth2Observation.wav" />  
+</audio> 
+
+<p>Eight such observations are available. The same algorithms as in the previous experiment are used, to demonstrate the effect of using an MCLP step.
+
+
+<p> After applying MCLP, reverberation is supressed significantly. Below is the MCLP output when the first microphone is selected as the reference.
+
+<p>
+<audio controls="controls">  
+   <source src="Synth2MixedMCLP.wav" />  
+</audio> 
+
+<p> The effect of MCLP may also be observed by viewing the DOA function (see the manuscript for a description). The DOA functions with and without MCLP are shown below. The actual directions of the sources are 0 and 0.5 &pi; radians. Notice that MCLP reveals these directions. Interestingly, MCLP also reveals a small bump between &pi; and 1.5 &pi; radians, possibly a dominant reflection.
+
+<center>
+<img src = "figMixMUSICSynth1.jpg">
+</center>
+
+<p> Following MCLP, we apply the separation algorithms as outlined in the manuscript. Below are the results. For comparison, we also provide the outputs of the same algorithms when no MCLP is applied.
+
+<table>
+<tr>
+<td> </td>
+<td><center><p>Without MCLP</center></td>
+<td><center><p>With MCLP</center></td>
+</tr>
+<tr>
+<td><p>Source-1</td>
+<td><audio controls="controls">  
+   <source src="Synth2SepNoLP1.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="Synth2SepLP1.wav" />  
+</audio> 
+</td>
+</tr>
+<tr>
+<td><p>Source-2</td>
+<td><audio controls="controls">  
+   <source src="Synth2SepNoLP2.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="Synth2SepLP2.wav" />  
+</audio> 
+</td>
+</tr>
+</table>
+
+<hr/>
+<h4> Synthetic Experiment with Three Sources </h4>
+
+The data used in this experiment is produced similarly as in the synthetic experiments discussed above. 
+The main difference is the addition of a third source approximately in the direction &pi; radians. The signal observed at the first microphone is as below.
+
+<p>
+<audio controls="controls">  
+   <source src="Obs3Source.wav" />  
+</audio> 
+
+<p> Notice that the sources are reverberant. Applying MCLP by taking the first microphone as the reference produces the following signal.
+
+<p>
+<audio controls="controls">  
+   <source src="MCLP3Source.wav" />  
+</audio> 
+
+<p> The DOA functions before and after applying MCLP are shown below. Notice that, as in the experiment with two sources, MCLP noticeably suppresses the reflections and maintains the primary source direction.
+
+<center>
+<img src = "figMUSIC3Source.jpg">
+</center>
+
+<p> The reconstructions are obtained similarly as described in the paper. We apply GSS followed by a post-filter. Again, applying MCLP before separation noticeably improves the reconstructions.
+
+<table>
+<tr>
+<td> </td>
+<td><center><p>Without MCLP</center></td>
+<td><center><p>With MCLP</center></td>
+</tr>
+<tr>
+<td><p>Source-1</td>
+<td><audio controls="controls">  
+   <source src="Rec3Source1.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="RecLP3Source1.wav" />  
+</audio> 
+</td>
+</tr>
+<tr>
+<td><p>Source-2</td>
+<td><audio controls="controls">  
+   <source src="Rec3Source2.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="RecLP3Source2.wav" />  
+</audio> 
+</td>
+</tr>
+<tr>
+<td><p>Source-3</td>
+<td><audio controls="controls">  
+   <source src="Rec3Source3.wav" />  
+</audio> 
+</td>
+<td><audio controls="controls">  
+   <source src="RecLP3Source3.wav" />  
+</audio> 
+</td>
+</tr>
+</table>
+
+<hr/>
+
+
+<br/>
+</p>
+</body>
+</html>

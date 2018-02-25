@@ -1,0 +1,352 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Haar Wavelet Transform</title><meta name="generator" content="MATLAB 8.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-04-05"><meta name="DC.source" content="HaarDWTW8.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Haar Wavelet Transform</h1><!--introduction--><p>We study the Haar transform this week. Our goal is to implement the Haar wavelet, which will be used for simple inverse problems in the coming weeks.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Analysis Filter Bank</a></li><li><a href="#5">Synthesis Filter Bank</a></li><li><a href="#10">Iterating the Filter Banks</a></li><li><a href="#15">Coefficient Distribution</a></li><li><a href="#18">In-Class Assignment</a></li></ul></div><p>We will work on the 'boat' image.</p><pre class="codeinput">x = imread(<span class="string">'boat.512.tiff'</span>);
+imshow(x);
+x = double(x);
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_01.png" alt=""> <h2>Analysis Filter Bank<a name="2"></a></h2><p>The analysis filter bank consists of average and difference operators applied horizontally and vertically. Here are the horizontal average and difference images. Notice that we stack them together so that we end up with an image of the same size. This allows to process the coefficients easily.</p><pre class="codeinput">HorizAvg = ( x(:,1:2:end) + x(:,2:2:end) ) / sqrt(2);
+HorizDiff = ( x(:,1:2:end) - x(:,2:2:end) ) / sqrt(2);
+Horiz = [HorizAvg HorizDiff];
+figure;
+imagesc(Horiz);colormap(gray);axis <span class="string">image</span>;
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_02.png" alt=""> <p>Let us now obtain vertical average and difference images applied to the horizontally processed image.</p><pre class="codeinput">VertAvg = ( Horiz(1:2:end,:) + Horiz(2:2:end,:) ) / sqrt(2);
+VertDiff = ( Horiz(1:2:end,:) - Horiz(2:2:end,:) ) / sqrt(2);
+Vert = [VertAvg; VertDiff];
+figure;
+imagesc(Vert); colormap(gray); axis <span class="string">image</span>;
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_03.png" alt=""> <p>Your first task is to write a function called 'HaarAFB' that takes an input image x to the coefficients above. Here's how your function should work like.</p><pre class="codeinput">c = HaarAFB(x); <span class="comment">% c should be the same as 'Vert'</span>
+dif = c - Vert; <span class="comment">% difference must be numerically zero</span>
+max( abs( dif(:) ) )
+</pre><pre class="codeoutput">
+ans =
+
+   1.1369e-13
+
+</pre><h2>Synthesis Filter Bank<a name="5"></a></h2><p>If we know the average and difference of two numbers, we can easily obtain the numbers. Therefore we can go back from c to x above. Here are the vertical average and difference images applied to the horizontally processed image.</p><pre class="codeinput">c = Vert;
+c(1:2:end,:) = ( Vert(1:end/2,:) + Vert(end/2+1:end,:) ) / sqrt(2);
+c(2:2:end,:) = ( Vert(1:end/2,:) - Vert(end/2+1:end,:) ) / sqrt(2);
+figure;
+imagesc(c); colormap(gray); axis <span class="string">image</span>;
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_04.png" alt=""> <p>Note that this operation takes Vert to Horiz. Let us check that</p><pre class="codeinput">dif = c - Horiz;
+max( abs( dif(:) ) )
+</pre><pre class="codeoutput">
+ans =
+
+   1.1369e-13
+
+</pre><p>We can similarly invert the horizontal average/difference operations and obtain the original image.</p><pre class="codeinput">d = c;
+d(:,1:2:end) = ( c(:,1:end/2) + c(:,end/2+1:end) ) / sqrt(2);
+d(:,2:2:end) = ( c(:,1:end/2) - c(:,end/2+1:end) ) / sqrt(2);
+
+figure;
+imagesc(d); colormap(gray); axis <span class="string">image</span>;
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_05.png" alt=""> <p>Let us check if we got back the original image</p><pre class="codeinput">dif = c - x;
+max( abs( dif(:) ) )
+</pre><pre class="codeoutput">
+ans =
+
+  338.2082
+
+</pre><p>Your next task is to write a function 'HaarSFB' that inverts 'HaarAFB'.</p><pre class="codeinput">y = HaarSFB(Vert); <span class="comment">% y should be the same as the original image</span>
+dif = x - y;
+max( abs( dif(:) ) )
+</pre><pre class="codeoutput">
+ans =
+
+   1.4211e-13
+
+</pre><h2>Iterating the Filter Banks<a name="10"></a></h2><p>Suppose we keep applying this function on the lowpass part of the image. Here's an additional stage.</p><pre class="codeinput">c = Vert;
+x1 = c(1:end/2,1:end/2);
+c1 = HaarAFB(x1);
+c(1:end/2,1:end/2) = c1;
+figure;
+imagesc(c); colormap(gray); axis <span class="string">image</span>;
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_06.png" alt=""> <p>Here's a further stage</p><pre class="codeinput">x2 = c1(1:end/2,1:end/2);
+c2 = HaarAFB(x2);
+c1(1:end/2,1:end/2) = c2;
+c(1:end/2,1:end/2) = c1;
+figure;
+imagesc(c); colormap(gray); axis <span class="string">image</span>;
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_07.png" alt=""> <p>Observe that as we iterate, the lowpass image gets smaller but the rest of the coefficients are close to zero. This behavior is typical of many images and is the main reason for the succcess of methods based on 'sparsity' in image processing.</p><p>Write a function 'HaarDWT' that keeps applying HaarAFB which allows to choose the number of stages. Here's a demonstration.</p><pre class="codeinput">J = 3; <span class="comment">% number of stages</span>
+coef = HaarDWT(x,J);
+dif = coef - c; <span class="comment">% check that HaarDWT produced the same coefficients as above</span>
+max( abs( dif(:) ) )
+</pre><pre class="codeoutput">
+ans =
+
+   4.5475e-13
+
+</pre><p>Now that we have an iterated version of the analysis filter bank. We need a function that inverts it. Write a function 'HaarIDWT that inverts 'HaarDWT'</p><pre class="codeinput">y = HaarIDWT(coef,J);
+dif = x - y ;
+max( abs( dif(:) ) )
+</pre><pre class="codeoutput">
+ans =
+
+   1.7053e-13
+
+</pre><h2>Coefficient Distribution<a name="15"></a></h2><p>To see the distribution of the coefficients we can look at the histogram.</p><pre class="codeinput">figure;
+hist( coef(:) , 500 );
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_08.png" alt=""> <p>Observe that coefficients are concentrated around zero. That is, many coefficients are close to zero.</p><p>Alternatively, we can monitor how the energy of the error changes as we keep a small percentage of coefficients.</p><pre class="codeinput">cs = sort( abs( coef(:) ) , <span class="string">'descend'</span>);
+L = length( coef(:) ); <span class="comment">% number of coefficients</span>
+
+
+percentage = 0.1:0.1:5; <span class="comment">% percentage of coefficients kept</span>
+MSE = [];
+en = sum(  cs.^2 ); <span class="comment">%this is the total energy</span>
+<span class="keyword">for</span> p = percentage,
+    K = ceil( p * L / 100) ;
+    error = sum( cs(K+1:end).^2 ); <span class="comment">% this is the error</span>
+    MSE = [MSE error/en];
+<span class="keyword">end</span>
+
+figure;
+plot(percentage,MSE*100);
+xlabel(<span class="string">'Percentage of Coefficients Kept'</span>);
+ylabel(<span class="string">'Percentage of Error'</span>);
+</pre><img vspace="5" hspace="5" src="HaarDWTW8_09.png" alt=""> <h2>In-Class Assignment<a name="18"></a></h2><div><ol><li>Write a function 'HaarAFB' takes as input an image and applies a 1-stage Haar filter bank as described above.</li><li>Apply your function to the 'Cameraman' image below and show the coefficients.</li><li>Write a function 'HaarSFB' that inverts 'HaarAFB', as discussed above. The function should take as input the coefficients produced by HaarAFB and return the original image.</li><li>Check that your function 'HaarSFB' correctly inverts 'HaarAFB' using the 'Cameraman' image, as above.</li><li>Write a function 'HaarDWT' that applies a J-stage Haar DWT. The function should take as input the image and J and should return the wavelet coefficients.</li><li>Apply your 'HaarDWT' function to the 'Cameraman' image. Display the wavelet coefficients. Your function should be able to handle any J. Try in particular J = 3 and J = 5.</li><li>Write a function 'HaarIDWT' that inverts 'HaarDWT'.</li><li>Check that 'HaarIDWT' correctly inverts 'HaarDWT' using the 'Cameraman' image for the two choice of J above.</li></ol></div><p><img vspace="5" hspace="5" src="cameraman.png" alt=""> </p><p><i>Ilker Bayram, Istanbul Teknik Universitesi, 2015</i></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Haar Wavelet Transform
+% We study the Haar transform this week. Our goal is to implement the Haar
+% wavelet, which will be used for simple inverse problems in the coming
+% weeks.
+
+%%
+% We will work on the 'boat' image.
+x = imread('boat.512.tiff');
+imshow(x);
+x = double(x);
+
+%% Analysis Filter Bank
+% The analysis filter bank consists of average and difference
+% operators applied horizontally and vertically. 
+% Here are the horizontal average and difference images. Notice that we
+% stack them together so that we end up with an image of the same size.
+% This allows to process the coefficients easily.
+HorizAvg = ( x(:,1:2:end) + x(:,2:2:end) ) / sqrt(2);
+HorizDiff = ( x(:,1:2:end) - x(:,2:2:end) ) / sqrt(2);
+Horiz = [HorizAvg HorizDiff];
+figure;
+imagesc(Horiz);colormap(gray);axis image;
+
+
+%%
+% Let us now obtain vertical average and difference images applied to the horizontally
+% processed image.
+VertAvg = ( Horiz(1:2:end,:) + Horiz(2:2:end,:) ) / sqrt(2);
+VertDiff = ( Horiz(1:2:end,:) - Horiz(2:2:end,:) ) / sqrt(2);
+Vert = [VertAvg; VertDiff];
+figure;
+imagesc(Vert); colormap(gray); axis image;
+
+
+%%
+% Your first task is to write a function called 'HaarAFB' that takes an input image x to the
+% coefficients above. Here's how your function should work like.
+
+c = HaarAFB(x); % c should be the same as 'Vert'
+dif = c - Vert; % difference must be numerically zero
+max( abs( dif(:) ) )
+
+%% Synthesis Filter Bank
+% If we know the average and difference of two numbers, we can easily obtain the numbers.
+% Therefore we can go back from c to x above. 
+% Here are the vertical average and difference images applied to the horizontally
+% processed image. 
+c = Vert;
+c(1:2:end,:) = ( Vert(1:end/2,:) + Vert(end/2+1:end,:) ) / sqrt(2);
+c(2:2:end,:) = ( Vert(1:end/2,:) - Vert(end/2+1:end,:) ) / sqrt(2);
+figure;
+imagesc(c); colormap(gray); axis image;
+%%
+% Note that this operation takes Vert to Horiz. Let us check that
+dif = c - Horiz;
+max( abs( dif(:) ) )
+%%
+% We can similarly invert the horizontal average/difference operations and
+% obtain the original image.
+d = c;
+d(:,1:2:end) = ( c(:,1:end/2) + c(:,end/2+1:end) ) / sqrt(2);
+d(:,2:2:end) = ( c(:,1:end/2) - c(:,end/2+1:end) ) / sqrt(2);
+
+figure;
+imagesc(d); colormap(gray); axis image;
+
+%% 
+% Let us check if we got back the original image
+
+dif = c - x;
+max( abs( dif(:) ) )
+
+%%
+% Your next task is to write a function 'HaarSFB' that inverts 'HaarAFB'.
+
+y = HaarSFB(Vert); % y should be the same as the original image
+dif = x - y; 
+max( abs( dif(:) ) )
+
+
+%% Iterating the Filter Banks
+% Suppose we keep applying this function on the lowpass part of the image.
+% Here's an additional stage.
+c = Vert; 
+x1 = c(1:end/2,1:end/2);
+c1 = HaarAFB(x1);
+c(1:end/2,1:end/2) = c1;
+figure;
+imagesc(c); colormap(gray); axis image;
+
+%%
+% Here's a further stage
+x2 = c1(1:end/2,1:end/2);
+c2 = HaarAFB(x2);
+c1(1:end/2,1:end/2) = c2;
+c(1:end/2,1:end/2) = c1;
+figure;
+imagesc(c); colormap(gray); axis image;
+
+%%
+% Observe that as we iterate, the lowpass image gets smaller but the rest
+% of the coefficients are close to zero. This behavior is typical 
+% of many images and is the main reason for the succcess of methods based
+% on 'sparsity' in image processing.
+%% 
+% Write a function 'HaarDWT' that keeps applying HaarAFB which allows to choose the
+% number of stages. Here's a demonstration.
+
+J = 3; % number of stages
+coef = HaarDWT(x,J);
+dif = coef - c; % check that HaarDWT produced the same coefficients as above
+max( abs( dif(:) ) )
+
+
+
+%%
+% Now that we have an iterated version of the analysis filter bank. We need
+% a function that inverts it. 
+% Write a function 'HaarIDWT that inverts 'HaarDWT'
+
+y = HaarIDWT(coef,J);
+dif = x - y ;
+max( abs( dif(:) ) )
+
+%% Coefficient Distribution
+% To see the distribution of the coefficients we can look at the histogram.
+
+figure;
+hist( coef(:) , 500 );
+
+%%
+% Observe that coefficients are concentrated around zero. That is, many
+% coefficients are close to zero.
+
+%%
+% Alternatively, we can monitor how the energy of the error changes as we
+% keep a small percentage of coefficients.
+
+cs = sort( abs( coef(:) ) , 'descend');
+L = length( coef(:) ); % number of coefficients
+
+
+percentage = 0.1:0.1:5; % percentage of coefficients kept
+MSE = [];
+en = sum(  cs.^2 ); %this is the total energy
+for p = percentage,
+    K = ceil( p * L / 100) ;
+    error = sum( cs(K+1:end).^2 ); % this is the error
+    MSE = [MSE error/en];
+end
+
+figure;
+plot(percentage,MSE*100);
+xlabel('Percentage of Coefficients Kept');
+ylabel('Percentage of Error');
+
+%% In-Class Assignment
+% # Write a function 'HaarAFB' takes as input an image and applies a 1-stage Haar filter bank as described above.
+% # Apply your function to the 'Cameraman' image below and show the coefficients.
+% # Write a function 'HaarSFB' that inverts 'HaarAFB', as discussed above.
+% The function should take as input the coefficients produced by HaarAFB
+% and return the original image.
+% # Check that your function 'HaarSFB' correctly inverts 'HaarAFB' using the 'Cameraman' image, as
+% above.
+% # Write a function 'HaarDWT' that applies a J-stage Haar DWT. The
+% function should take as input the image and J and should return the
+% wavelet coefficients.
+% # Apply your 'HaarDWT' function to the 'Cameraman' image. Display the wavelet
+% coefficients. Your function should be able to handle any J. Try in
+% particular J = 3 and J = 5.
+% # Write a function 'HaarIDWT' that inverts 'HaarDWT'. 
+% # Check that 'HaarIDWT' correctly inverts 'HaarDWT' using the 'Cameraman'
+% image for the two choice of J above.
+%
+% <<cameraman.png>>
+%
+
+%%
+% _Ilker Bayram, Istanbul Teknik Universitesi, 2015_
+##### SOURCE END #####
+--></body></html>
